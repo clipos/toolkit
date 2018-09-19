@@ -1,0 +1,39 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+# Copyright © 2017-2018 ANSSI. All rights reserved.
+
+# This is an example of an "instrumentation.toml" file intended to be dropped
+# at the root of the CLIP OS source tree (i.e. the "repo" root).
+# When existing at the root of the CLIP OS source tree product repository, this
+# "drop-in" file changes to the behavior of the recipe actions (mainly the
+# "build", "image", "configure" and "bundle" actions) for providing
+# instrumentation to the selected recipes.
+#
+# Note 1: By default, all the recipes of the current product *NOT DECLARED* in
+# this file will be produced without instrumentation (i.e. as it would be in a
+# normal build intended for production use).
+#
+# Note 2: If instrumentation is requested for at least one recipe, then the
+# product version will be tainted with an "instrumented" tag as a SemVer build
+# metadata (e.g. "X.Y.Z+instrumented").
+
+# Recipes that shall be produced instrumented for use by a developer:
+#
+# For instance, a recipe instrumented in "development" mode may embed tools of
+# various nature (such as networking utilities, debuggers, text editors, etc.
+# depending on the needs of that recipe) to provide means of analyzing issues
+# or means to develop new features or enhance that recipe.
+development = [
+    "clipos/core",
+]
+
+# Recipes that shall be produced instrumented for debugging investigations:
+#
+# Usually, this instrumentation level includes the features provided by the
+# "development" instrumentation level but goes further as it may also force the
+# build of some consequent parts of the recipe to use a compilation mode with
+# debugging features (e.g. symbols) for further bug investigations.
+debug = [
+    "clipos/efiboot",
+]
+
+# vim: set ts=4 sts=4 sw=4 et ft=toml:

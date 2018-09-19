@@ -1,0 +1,24 @@
+.*.sw?
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+develop-eggs/
+eggs/
+.eggs/
+wheels/
+*.egg-info/
+*.egg
+
+# Environments
+venv/
+
+# Mypy cache
+.mypy_cache/
