@@ -448,10 +448,14 @@ class RecipeVirtualizedEnvironmentFeature(RecipeFeature):
 
     @property
     def virtualized_environment(self) -> VirtualizedEnvironment:
+        # When doing TPM emulation, libvirt passes the guest name to swtpm,
+        # which then uses it as a CN, for which '+' signs have a special
+        # meaning.
+        name="{}-{}_{}".format(self.recipe.product.name,
+                               self.recipe.name,
+                               self.recipe.product.tainted_version).replace('+', '--')
         return VirtualizedEnvironment(
-            name="{}-{}_{}".format(self.recipe.product.name,
-                                   self.recipe.name,
-                                   self.recipe.product.tainted_version),
+            name=name,
             libvirt_domain_xml_template=self.replace_placeholders(
                 self.recipe.config["virt"]["xml_domain_template"],
                 sdk_context=False),
