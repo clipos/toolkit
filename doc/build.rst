@@ -141,7 +141,7 @@ rebuild from scratch using:
 
 .. code-block:: shell-session
 
-   (toolkit) $ sujust products/clipos/sdk/bootstrap-from-sratch
+   (toolkit) $ sujust products/clipos/sdk/bootstrap-from-scratch
 
 Core
 ~~~~
