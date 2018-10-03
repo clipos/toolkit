@@ -22,9 +22,28 @@ rm -rf \
 mkdir -p "${REPOROOT}/run/cargo"
 
 pushd "${REPOROOT}/run/cargo"
+
+# Create a fake just project with all dependencies to retrieve crates
 cargo new just
 pushd "just"
-echo "just = \"0.3.12\"" >> "Cargo.toml"
+cat >> "Cargo.toml" <<EOF
+just            = "0.3.12"
+ansi_term       = "0.11"
+assert_matches  = "1.1.0"
+atty            = "0.2.1"
+brev            = "0.1.6"
+clap            = "2.0.0"
+dotenv          = "0.13.0"
+edit-distance   = "2.0.0"
+itertools       = "0.7"
+lazy_static     = "1.0.0"
+libc            = "0.2.21"
+regex           = "1.0.0"
+target          = "1.0.0"
+tempdir         = "0.3.5"
+unicode-width   = "0.1.3"
+executable-path = "1.0.0"
+EOF
 cargo update
 popd
 popd
