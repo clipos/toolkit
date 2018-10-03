@@ -310,6 +310,7 @@ Then to get the entire source tree:
    $ mkdir clipos
    $ cd clipos
    $ umask 0022
+   $ git lfs install --skip-repo
    $ repo init -u https://github.com/CLIPOS/manifest
    $ repo sync
 
@@ -336,6 +337,18 @@ kernel (``src/external/linux/``) or the Gentoo Portage tree
 
 At this point, you should have successfully set up your environment and
 fetched the whole source tree of the CLIP OS project.
+
+.. admonition:: In case you forgot to install the Git LFS filters *before*
+                synchronizing the whole source tree
+   :class: note
+
+   If you forgot to setup the Git LFS filter before running ``repo sync``, you
+   can still download the missing contents of the files backed by Git LFS (and
+   therefore fix your current source tree checkout) by running this command:
+
+   .. code-block:: shell-session
+
+      $ repo forall -c 'git lfs install && git lfs pull'
 
 Congratulations, you are now ready to launch a :ref:`build of a CLIP OS image
 <build>`.
