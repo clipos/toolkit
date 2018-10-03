@@ -196,6 +196,22 @@ your userland:
 - **libvirt with QEMU and KVM support** are required as the platform to run the
   CLIP OS virtual machines with QEMU with virtualized networks.
 
+  .. admonition:: Avoid running QEMU as root if not necessary
+     :class: tip
+
+     On some Linux distributions (e.g., Arch Linux), libvirt is provided with a
+     default configuration which runs QEMU as root. If you intend to use
+     libvirt only for the purpose of running CLIP OS QEMU images, you may want
+     to run the QEMU processes launched by libvirt as your current user.
+
+     To do so, edit the file ``/etc/libvirt/qemu.conf`` and change the values
+     for the ``user`` and ``group`` as follows:
+
+     .. code-block:: guess
+
+        user = "myusername"  # replace with your current username
+        group = "kvm"
+
 .. _dependencies-installation-on-supported-linux-distributions:
 
 Dependencies installation on supported Linux-distributions
