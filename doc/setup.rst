@@ -256,7 +256,7 @@ On Arch Linux:
          base-devel \
          runc sudo squashfs-tools \
          qemu libvirt bridge-utils dnsmasq \
-         virt-manager \
+         virt-manager ebtables \
          debootstrap \
          rust
 
