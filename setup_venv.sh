@@ -12,7 +12,7 @@ readonly PROGPATH="$(realpath "${BASH_SOURCE[0]%/*}")"
 # Full path to the venv and the vendor dirs:
 readonly TOOLKIT="$(realpath "${PROGPATH}")"
 readonly REPOROOT="$(realpath "${TOOLKIT}/..")"
-readonly VENV="${REPOROOT}/run/toolkit"
+readonly VENV="${REPOROOT}/run/venv"
 readonly VENDOR="${REPOROOT}/assets/toolkit"
 readonly REQUIREMENTS_TXT="${TOOLKIT}/requirements.txt"
 
@@ -23,10 +23,20 @@ if [[ -n "${VIRTUAL_ENV:-}" ]]; then
     exit 1
 fi
 
+# Explicit check that we have Python 3.6 at least on this system. Otherwise,
+# the use of the option "--prompt" will trigger an error that is absolutely not
+# explicit to indicate that the Python version is too old (since "--prompt" has
+# been introduced in Python 3.6).
+# Note: 0 means true in Bash, but True is 1 in Python world. ;)
+if python3 -c 'import sys; sys.exit(int(sys.version_info >= (3, 6)))'; then
+    echo >&2 "Python 3.6 at least is required for the CLIP OS toolkit."
+    exit 1
+fi
+
 # This won't strip anything from an eventually previously set up virtualenv in
 # this same directory.
 mkdir -p "${VENV}"
-python3 -m venv --symlinks "${VENV}"
+python3 -m venv --symlinks --prompt "toolkit" "${VENV}"
 
 # Avoid the message "You are using pip version X, however version Y is
 # available.". We consider that we are always using a fairly recent version

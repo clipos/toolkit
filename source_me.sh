@@ -159,13 +159,13 @@ END_OF_BANNER
 }
 
 __setup_and_activate_venv() {
-    echo >&2 " [*] Setting up a \"toolkit\" virtualenv..."
+    echo >&2 " [*] Setting up a dedicated virtualenv for the CLIP OS toolkit..."
     echo >&2 "     Please be patient as this may take some time on the first run."
     "${__path_to_toolkit}/setup_venv.sh" >| "${__path_to_runtime_dir}/virtualenv_setup.log" 2>&1
     if [ "$?" -eq 0 ]; then
-        . "${__path_to_runtime_dir}/toolkit/bin/activate" >| "${__path_to_runtime_dir}/virtualenv_activation.log" 2>&1
+        . "${__path_to_runtime_dir}/venv/bin/activate" >| "${__path_to_runtime_dir}/virtualenv_activation.log" 2>&1
         if [ "$?" -eq 0 ]; then
-            echo >&2 " [*] Virtualenv \"toolkit\" successfully activated for the current shell."
+            echo >&2 " [*] CLIP OS toolkit virtualenv successfully activated for the current shell."
         else
             echo >&2 " [!] Unknown error: virtualenv activation failed."
             echo >&2 "     Please read the log in \"run/virtualenv_activation.log\" at repo root level."
