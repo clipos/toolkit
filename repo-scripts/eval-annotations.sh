@@ -28,31 +28,21 @@ eval_annotations() {
     done
 }
 
-# Each project in the manifest can have a set of annotations, for example to fetch upstream updates:
+# Each project in the manifest can have a set of annotations, for example to
+# fetch upstream updates:
 #
-# <project
-#   name="src_external_linux"
-#   path="src/external/linux"
-# >
-#   <annotation
-#     name="UPSTREAM_GIT_0"
-#     value="https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git"
-#   />
-#   <annotation
-#     name="UPSTREAM_REFS_0"
-#     value="refs/heads/linux-4.16.y:refs/heads/upstream/stable-4.16 refs/tags/v*:refs/tags/v*"
-#   />
-#   <annotation
-#     name="UPSTREAM_GIT_1"
-#     value="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git"
-#   />
-#   <annotation
-#     name="UPSTREAM_REFS_1"
-#     value="refs/heads/master:refs/heads/upstream/master refs/tags/v*:refs/tags/v*"
-#   />
-# </project>
+#   <project name="src_external_linux" path="src/external/linux" >
+#     <annotation name="UPSTREAM_0_URL" value="https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git" />
+#     <annotation name="UPSTREAM_0_REFSPECS" value="refs/heads/linux-4.16.y:refs/heads/upstream/stable-4.16 refs/tags/v*:refs/tags/v*" />
+#     <annotation name="UPSTREAM_1_URL" value="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git" />
+#     <annotation name="UPSTREAM_1_REFSPECS" value="refs/heads/master:refs/heads/upstream/master refs/tags/v*:refs/tags/v*" />
+#   </project>
 #
-# This configuration creates two new remotes (upstream0 and upstream1), fetch their references and rename them locally.
+# This configuration creates two new remotes (upstream0 and upstream1), fetch
+# their references according to the given refspec(s) (i.e., fetch the specified
+# refspecs and rename them locally according to the mapping the refspec
+# describe, see chapter "Git Internals - The Refspec" of the Git Book for more
+# details).
 
 pull_upstream() {
     local index="$1"
