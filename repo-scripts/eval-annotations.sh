@@ -62,7 +62,6 @@ pull_upstream() {
     fi
     git fetch --no-tags -- "${remote}" "${refs[@]}"
 
-    # TODO: ask for git push..?
     echo
 }
 
