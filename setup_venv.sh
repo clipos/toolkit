@@ -10,7 +10,7 @@ readonly PROGNAME="${BASH_SOURCE[0]##*/}"
 readonly PROGPATH="$(realpath "${BASH_SOURCE[0]%/*}")"
 
 # Full path to the venv and the vendor dirs:
-readonly TOOLKIT="${PROGPATH}"
+readonly TOOLKIT="$(realpath "${PROGPATH}")"
 readonly REPOROOT="$(realpath "${TOOLKIT}/..")"
 readonly VENV="${REPOROOT}/run/toolkit"
 readonly VENDOR="${REPOROOT}/assets/toolkit"
@@ -55,6 +55,20 @@ EOF
 # deliberatly trust the "requirements.txt" to include the dependencies for
 # cosmk.
 "${VENV}/bin/pip" install --no-deps --editable "${TOOLKIT}"
+
+# Symlink the helper scripts available in the toolkit's "helpers" directory in
+# the "bin" directory of the virtualenv in order to make them appear via PATH.
+# This eases the ability to call those scripts for the user (espcially for the
+# scripts intended to be used with "repo forall" as repo changes the CWD).
+for item in "${TOOLKIT}/helpers/"*; do
+    if [[ -x "${item}" ]]; then
+        # Assuming GNU coreutils for the "--relative-to" option of realpath:
+        ln -snf \
+            "$(realpath --relative-to="${VENV}/bin" "${item}")" \
+            "${VENV}/bin/${item##*/}"
+    fi
+done
+unset item
 
 # Build and install just
 CARGO_HOME="${REPOROOT}/run/cargo"

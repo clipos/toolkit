@@ -10,7 +10,7 @@ readonly PROGNAME="${BASH_SOURCE[0]##*/}"
 readonly PROGPATH="$(realpath "${BASH_SOURCE[0]%/*}")"
 
 # Full path to the repo root dir:
-readonly TOOLKIT="${PROGPATH}"
+readonly TOOLKIT="$(realpath "${PROGPATH}/..")"
 readonly REPOROOT="$(realpath "${TOOLKIT}/..")"
 
 # Update vendored Rust crates registry for just

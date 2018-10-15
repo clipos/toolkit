@@ -340,21 +340,38 @@ The toolkit documentation.
 
 The root and configuration files used to build the full CLIP OS documentation.
 
+``tookit/helpers/``
+~~~~~~~~~~~~~~~~~~~
+
+This directory contains all the helpers scripts that are of particular interest
+for the project development common tasks. These tasks include (but are not
+limited to) the ability to build the documentation or to process the
+annotations in the *repo* manifest files (e.g., for fetching or synchronizing
+the upstream branches of downstream projects that are part of the CLIP OS
+source tree or for verifying the OpenPGP signatures of the Git commits).
+
+.. admonition:: Scripts under this directory are available in the ``PATH`` for
+                easier access
+   :class: tip
+
+   When the CLIP OS toolkit environment is loaded (see the ``source_me.sh``
+   script), the scripts under this directory are exposed in the environment
+   ``PATH`` thanks to symbolic links in the CLIP OS toolkit virtualenv.
+
 ``tookit/qa/``
 ~~~~~~~~~~~~~~
 
-Python tools and configuration used for QA for the ``cosmk`` module.
+This directory contains wrapper scripts and resources (e.g. configuration files
+for common Python checker tools such as *mypy* or *pylint*) used for quality
+assurance of the CLIP OS toolkit.
 
-``tookit/repo-scripts/``
-~~~~~~~~~~~~~~~~~~~~~~~~
+``tookit/maintenance/``
+~~~~~~~~~~~~~~~~~~~~~~~
 
-Scripts used with the ``repo forall`` command to run specific actions depending
-on context. Those scripts are usually calls by ``just`` recipes.
+This directory contains scripts useful to the CLIP OS toolkit developer for the
+maintenance of the CLIP OS toolkit (e.g., bumping and vendoring the required
+Python packages).
 
-``tookit/scripts/``
-~~~~~~~~~~~~~~~~~~~
-
-Helpers scripts.
 
 ``justfile``
 ------------

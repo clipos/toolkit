@@ -44,7 +44,7 @@ clean-all: clean clean-cache clean-run
 
 # Build the documentation
 doc:
-  ./toolkit/scripts/build_doc.sh
+  ./toolkit/helpers/build_doc.sh
 
 # Open the documentation in the default browser
 open-doc:
@@ -63,11 +63,11 @@ rfa +cmd:
 # Helper command for pretty and selective 'repo forall -c <cmd>' output
 # Warning: 'cmd' can not include arguments with spaces
 rfm +cmd:
-    repo forall -j 1 -c "${PWD}/toolkit/repo-scripts/filter-most.sh {{cmd}}"
+    repo forall -j 1 -c "${PWD}/toolkit/helpers/filter-most.sh {{cmd}}"
 
 # Update Git references from upstream repositories according to the manifest
 pull-upstream +projects='':
-    repo forall {{projects}} -c "${PWD}/toolkit/repo-scripts/eval-annotations.sh pull-upstream"
+    repo forall {{projects}} -c "${PWD}/toolkit/helpers/eval-annotations.sh pull-upstream"
 
 # repo status helper
 status:
