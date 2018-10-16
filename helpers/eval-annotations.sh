@@ -85,7 +85,7 @@ eval_annotations() {
             args+=("${!var}")
         done
         "${call}" "${index}" "${args[@]}"
-        let index++ || :
+        (( index++ )) || :
     done
 }
 
@@ -118,7 +118,7 @@ pull_upstream() {
 
     local refspecs
     # do not evaluate globs by transforming the list of refspecs to an array
-    read -a refspecs <<< "${3:?pull_upstream: missing refspecs as 3rd arg}"
+    read -ra refspecs <<< "${3:?pull_upstream: missing refspecs as 3rd arg}"
 
     local remote="upstream${index}"
 
