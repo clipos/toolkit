@@ -78,7 +78,7 @@ eval_annotations() {
         args=()  # hold the arg list to be passed to the callback function
         for item in "$@"; do
             var="REPO__${category}_${index}_${item:?eval_annotations: items cannot be empty string}"
-            if [[ -z "${!var:-}" ]]; then
+            if [[ -z "${!var+defined}" ]]; then
                 # annotations exhausted, exit the loop
                 return 0
             fi
