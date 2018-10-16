@@ -39,18 +39,30 @@ EOF
         exit 1
     fi
 
+    local exit_code=0
     case "${1:-}" in
         pull-upstream)
-            echo "[*] Starting to fetch upstream for ${REPO_PATH}"
-            eval_annotations "UPSTREAM" pull_upstream "URL" "REFSPECS"
+            echo "[*] Starting to pull upstream for \"${REPO_PATH}\"..."
+            if eval_annotations "UPSTREAM" pull_upstream "URL" "REFSPECS"; then
+                echo "[*] Upstream pull for \"${REPO_PATH}\" has ended successfully."
+            else
+                echo "[X] Upstream pull for \"${REPO_PATH}\" has ended with errors (eval_annotations returned \"$?\")."
+                exit_code=1
+            fi
             ;;
         *)
             echo >&2 "ERROR: Unknown command"
             echo >&2 "Available commands:"
             echo >&2 "- pull-upstream"
-            exit 1
+            exit_code=1
             ;;
     esac
+
+    # Line break to visually split each processed repository when "repo forall"
+    # is not spread on multiple jobs (-j option):
+    echo
+
+    exit "${exit_code}"
 }
 
 
@@ -60,10 +72,13 @@ EOF
 # name (e.g., <category>_<index>_<item>) and call the given callback function
 # with the appropriate argument list (i.e., the values held by each annotation
 # items in the order that were given to eval_annotations).
-# Each index triggers a call to the callback function provided that all the
-# items specified to eval_annotations could be found (otherwise this function
-# stops processing further annotations without warning). Indexes are
-# incremented until no annotations could be found.
+#
+# Each index triggers a call to the callback function provided that the items
+# specified to eval_annotations (last arguments) could be found. Missing items
+# are tolerated provided that they are part of the last arguments to the
+# callback function (when this one is variadic).
+# As a consequence, callback functions MUST check that their mandatory
+# arguments are given.
 eval_annotations() {
     local category="${1:?eval_annotations: missing category as 1st arg}"
     local call="${2:?eval_annotations: missing callback function as 2nd arg}"
@@ -73,18 +88,56 @@ eval_annotations() {
     # Loop to be exited when the annotations <category>_X_ITEM (with X being
     # the integer sequence and ITEM being the items set provided as argument
     # list to this function) are exhausted:
-    local args item var index=0
+    local args item latest_item_missed var
+    local index=0
+    local nb_callback_failures=0
     while true; do
+        attempt_callback=1  # always attempt callback call
+        latest_item_missed=0  # we begin with a new index, we missed nothing
         args=()  # hold the arg list to be passed to the callback function
+
+        # lookup all the annotations corresponding to the expected items to
+        # construct the callback function command line:
         for item in "$@"; do
-            var="REPO__${category}_${index}_${item:?eval_annotations: items cannot be empty string}"
+            var="REPO__${category}_${index}_${item:?eval_annotations: item cannot be empty string}"
+
             if [[ -z "${!var+defined}" ]]; then
-                # annotations exhausted, exit the loop
-                return 0
+                # i.e. var is not defined (empty value is considered defined!)
+
+                # OK, so we miss this item. This is tolerated but every
+                # subsequent items for this category index MUST be missed as
+                # well.
+                # Otherwise an annotation is missing in the manifest. On
+                # contrary we will consider that we have exhausted the
+                # annotations for this category index.
+                latest_item_missed=1
+                continue
+
+            elif [[ "${latest_item_missed}" -ne 0 ]]; then
+                echo >&2 "  [!] \"${var#REPO__}\" annotation has been found but another annotation for this category index is required but missing."
+                echo >&2 "  [!] Callback \"${call}\" for these category index annotations (${category}_${index}_*) won't be attempted."
+                attempt_callback=0
+                break
             fi
+
             args+=("${!var}")
         done
-        "${call}" "${index}" "${args[@]}"
+
+        if [[ "${#args[@]}" -eq 0 && "${attempt_callback}" -ne 0 ]]; then
+            # No args (with the fact that the callback would have been
+            # attempted) means that absolutely no annotations has been found
+            # for this category index.
+            # Therefore we can consider that we have exhausted all the
+            # annotation indexes. Exit this function with the number of
+            # failed/non-attempted callback functions:
+            return "${nb_callback_failures}"
+        fi
+
+        if [[ "${attempt_callback}" -eq 0 ]] || \
+                ! "${call}" "${index}" "${args[@]}"; then
+            (( nb_callback_failures++ )) || :
+        fi
+
         (( index++ )) || :
     done
 }
@@ -122,7 +175,7 @@ pull_upstream() {
 
     local remote="upstream${index}"
 
-    echo "[+] Fetching refspecs ${refspecs[*]}"
+    echo "    [+] Fetching refspecs ${refspecs[*]}"
 
     local current
     current="$(git remote get-url "${remote}" 2> /dev/null || :)"
@@ -131,8 +184,6 @@ pull_upstream() {
         git remote add -- "${remote}" "${url}"
     fi
     git fetch --no-tags -- "${remote}" "${refspecs[@]}"
-
-    echo  # line break to visually split the result of each upstream fetch
 }
 
 
