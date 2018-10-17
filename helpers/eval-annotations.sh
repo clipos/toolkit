@@ -41,12 +41,12 @@ EOF
 
     local exit_code=0
     case "${1:-}" in
-        pull-upstream)
-            echo "[*] Starting to pull upstream for \"${REPO_PATH}\"..."
-            if eval_annotations "UPSTREAM" pull_upstream "URL" "REFSPECS"; then
-                echo "[*] Upstream pull for \"${REPO_PATH}\" has ended successfully."
+        declare-upstreams)
+            echo "[*] Starting to declare upstreams for \"${REPO_PATH}\"..."
+            if eval_annotations "UPSTREAM" declare_upstreams "URL" "REFSPECS"; then
+                echo "[*] Upstreams declaration for \"${REPO_PATH}\" has ended successfully."
             else
-                echo "[X] Upstream pull for \"${REPO_PATH}\" has ended with errors (eval_annotations returned \"$?\")."
+                echo "[X] Upstreams declaration for \"${REPO_PATH}\" has ended with errors (eval_annotations returned \"$?\")."
                 exit_code=1
             fi
             ;;
@@ -62,7 +62,7 @@ EOF
         *)
             echo >&2 "ERROR: Unknown command"
             echo >&2 "Available commands:"
-            echo >&2 "- pull-upstream"
+            echo >&2 "- declare-upstreams"
             echo >&2 "- verify"
             exit_code=1
             ;;
@@ -152,16 +152,23 @@ eval_annotations() {
     done
 }
 
-
-#   pull_upstream <annotation-index> <git-remote-URL> <refspecs>
+#   declare_upstreams <annotation-index> <git-remote-URL> <refspecs>
 #
 # This function is a callback function to provide to the eval_annotations
-# function. It fetches the upstream Git references specified in the refspecs
-# string (multiple refspec can be given provided they are whitespace-separated)
-# from the Git remote URL and create the expected local branches according to
-# the refspecs.
+# function. It declares the upstream Git remote "remote<INDEX>" tied to the
+# specified URL and add to the fetch mapping references the given refspecs
+# (which must be fully-qualified refspecs with +?<remote>:<local> references
+# mapping).
+# As a consequence, this enables the developer to update the dedicated local
+# branches (meant to track the upstream projects for development convenience)
+# automatically when doing a "git fetch <upstream-remote-name>".
+# Multiple refspecs can be given for an upstream provided they are
+# whitespace-separated.
+# The syntax in the "refspecs" string follows what is accepted by the command
+# "git fetch" (see chapter "Git Internals - The Refspec" of the Git Book for
+# more details).
 #
-# As an example:
+# As an example, the following configuration:
 #
 #   <project name="src_external_linux" path="src/external/linux">
 #     <annotation name="UPSTREAM_0_URL" value="https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git" />
@@ -170,30 +177,41 @@ eval_annotations() {
 #     <annotation name="UPSTREAM_1_REFSPECS" value="refs/heads/master:refs/heads/upstream/master refs/tags/v*:refs/tags/v*" />
 #   </project>
 #
-# This configuration creates two new remotes (upstream0 and upstream1), fetch
-# their references and create the local branches according to the given
-# refspecs. The syntax in the refspecs string follows what is accepted by the
-# command "git fetch" (see chapter "Git Internals - The Refspec" of the Git
-# Book for more details).
-pull_upstream() {
-    local index="${1:?pull_upstream: missing annotation index as 1st arg}"
-    local url="${2:?pull_upstream: missing remote URL as 2nd arg}"
+# will declare two Git remotes ("upstream0" and "upstream1") that automatically
+# updates the local branches "upstream/stable-4.16" and "upstream/master" (as
+# well as the tags also specified in each refspec) whenever the user does a
+# "git fetch upstreamX" (with X being 0 and 1).
+declare_upstreams() {
+    local index="${1:?declare_upstreams: missing annotation index as 1st arg}"
+    local url="${2:?declare_upstreams: missing remote URL as 2nd arg}"
 
     local refspecs
     # do not evaluate globs by transforming the list of refspecs to an array
-    read -ra refspecs <<< "${3:?pull_upstream: missing refspecs as 3rd arg}"
+    read -ra refspecs <<< "${3:?declare_upstreams: missing refspecs as 3rd arg}"
 
     local remote="upstream${index}"
 
-    echo "    [+] Fetching refspecs ${refspecs[*]}"
+    echo "    [+] Declaring remote \"${remote}\" pointing to \"${url}\""
 
-    local current
-    current="$(git remote get-url "${remote}" 2> /dev/null || :)"
-    if [[ "${current}" != "${url}" ]]; then
-        git remote remove "${remote}" 2> /dev/null || :
-        git remote add -- "${remote}" "${url}"
-    fi
-    git fetch --no-tags -- "${remote}" "${refspecs[@]}"
+    # This always overwrites pre-existing remotes!
+    git remote remove "${remote}" 2>/dev/null || :
+    git remote add -- "${remote}" "${url}"
+
+    # Define all the refspecs into that remote:
+    local refmap
+    for refmap in "${refspecs[@]}"; do
+        # safety assertion
+        if ! [[ "${refmap}" =~ ^\+?refs/.+:refs/.+$ ]]; then
+            echo "    [!] Bad refspec \"${refmap}\". You must a use fully-qualified refspec."
+            echo "        Skipping this refspec."
+            return 1
+        elif [[ "${refmap}" =~ ^\+ ]]; then
+            echo "    [-] Careful! The refspec \"${refmap}\" implies that Git would blindly force-update the local references if the upstream rewrote their history."
+            echo "        This is just a warning message."
+        fi
+        # this should not fail:
+        git config --add "remote.${remote}.fetch" "${refmap}"
+    done
 }
 
 

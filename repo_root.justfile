@@ -65,9 +65,14 @@ rfa +cmd:
 rfm +cmd:
     repo forall -j 1 -c "${PWD}/toolkit/helpers/filter-most.sh {{cmd}}"
 
-# Update Git references from upstream repositories according to the manifest
-pull-upstream +projects='':
-    repo forall {{projects}} -c "${PWD}/toolkit/helpers/eval-annotations.sh pull-upstream"
+# Update Git remotes with the upstream defined in the manifest
+declare-upstreams +projects='':
+    repo forall {{projects}} -c "${PWD}/toolkit/helpers/declare-upstreams.sh"
+
+# Fetch the Git references from upstream remotes defined with
+# "declare-upstreams"
+fetch-upstreams +projects='':
+    repo forall {{projects}} -c "${PWD}/toolkit/helpers/fetch-upstreams.sh"
 
 # repo status helper
 status:
