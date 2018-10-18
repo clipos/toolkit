@@ -2,8 +2,6 @@
 # SPDX-License-Identifier: LGPL-2.1-or-later
 # Copyright © 2017-2018 ANSSI. All rights reserved.
 
-set -e -u -o pipefail
-
 # Each project in the manifest can have a set of annotations, as shown in the
 # dummy example below:
 #
@@ -18,9 +16,13 @@ set -e -u -o pipefail
 # "<CATEGORY>_<INDEX>_<ITEM-NAME>" with INDEX being a positive integer (indexes
 # start at 0) without leading zeroes.
 
-main() {
-    if [[ -z "${REPO_PATH:-}" ]]; then
-        cat >&2 <<EOF
+set -e -u -o pipefail
+
+readonly SELFNAME="${BASH_SOURCE[0]##*/}"
+readonly SELFPATH="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
+
+if [[ -z "${REPO_PATH:-}" ]]; then
+    cat >&2 <<EOF
 ERROR: Missing repo environment variables (REPO_*).
 
 This script is intended to be run via the "repo forall" command, such as:
@@ -36,10 +38,12 @@ repo project directory).
 
 See "repo help forall" for more details. The above example is not exhaustive.
 EOF
-        exit 1
-    fi
+    exit 1
+fi
 
+main() {
     local exit_code=0
+
     case "${1:-}" in
         declare-upstreams)
             echo "[*] Starting to declare upstreams for \"${REPO_PATH}\"..."
@@ -67,10 +71,6 @@ EOF
             exit_code=1
             ;;
     esac
-
-    # Line break to visually split each processed repository when "repo forall"
-    # is not spread on multiple jobs (-j option):
-    echo
 
     exit "${exit_code}"
 }
@@ -191,7 +191,7 @@ declare_upstreams() {
 
     local remote="upstream${index}"
 
-    echo "    [+] Declaring remote \"${remote}\" pointing to \"${url}\""
+    echo "  [+] Declaring remote \"${remote}\" pointing to \"${url}\""
 
     # This always overwrites pre-existing remotes!
     git remote remove "${remote}" 2>/dev/null || :
@@ -202,12 +202,12 @@ declare_upstreams() {
     for refmap in "${refspecs[@]}"; do
         # safety assertion
         if ! [[ "${refmap}" =~ ^\+?refs/.+:refs/.+$ ]]; then
-            echo "    [!] Bad refspec \"${refmap}\". You must a use fully-qualified refspec."
-            echo "        Skipping this refspec."
+            echo "  [!] Bad refspec \"${refmap}\". You must use a fully-qualified refspec."
+            echo "      Skipping this refspec."
             return 1
         elif [[ "${refmap}" =~ ^\+ ]]; then
-            echo "    [-] Careful! The refspec \"${refmap}\" implies that Git would blindly force-update the local references if the upstream rewrote their history."
-            echo "        This is just a warning message."
+            echo "  [-] Careful! The refspec \"${refmap}\" implies that Git would blindly force-update the local references if the upstream rewrote their history."
+            echo "      This is just a warning message."
         fi
         # this should not fail:
         git config --add "remote.${remote}.fetch" "${refmap}"
@@ -258,7 +258,7 @@ verify() {
     repo_root="${PWD%/${REPO_PATH%/}}" # strip also the trailing slash
     # safety check assertion:
     if [[ "${repo_root}" == "${PWD}" ]]; then
-        echo >&2 "    [!] Could not compute repo root path from CWD. :("
+        echo >&2 "  [!] Could not compute repo root path from CWD. :("
         return 1
     fi
 
@@ -270,7 +270,7 @@ verify() {
 
     # Query Git to retrieve all the available refs into an array
     local all_refs_str all_refs
-    all_refs_str="$(git show-ref | awk '{ printf $2" "}')"
+    all_refs_str="$(git show-ref | awk '{ printf $2" " }')"
     # use an array for homogeneity with the rest of the code
     read -ra all_refs <<< "${all_refs_str}"
 
