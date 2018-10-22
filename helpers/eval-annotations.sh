@@ -50,7 +50,7 @@ main() {
             if eval_annotations "UPSTREAM" declare_upstreams "URL" "REFSPECS"; then
                 echo "[*] Upstreams declaration for \"${REPO_PATH}\" has ended successfully."
             else
-                echo "[X] Upstreams declaration for \"${REPO_PATH}\" has ended with errors (eval_annotations returned \"$?\")."
+                echo "[X] Upstreams declaration for \"${REPO_PATH}\" has ended with errors."
                 exit_code=1
             fi
             ;;
@@ -59,7 +59,7 @@ main() {
             if eval_annotations "VERIFY" verify "KEYRINGS" "REFS" "REFS_EXCLUDE"; then
                 echo "[*] References verification for \"${REPO_PATH}\" has ended successfully."
             else
-                echo "[X] References verification for \"${REPO_PATH}\" has ended with errors (eval_annotations returned \"$?\")."
+                echo "[X] References verification for \"${REPO_PATH}\" has ended with errors."
                 exit_code=1
             fi
             ;;
@@ -138,9 +138,15 @@ eval_annotations() {
             # attempted) means that absolutely no annotations has been found
             # for this category index.
             # Therefore we can consider that we have exhausted all the
-            # annotation indexes. Exit this function with the number of
-            # failed/non-attempted callback functions:
-            return "${nb_callback_failures}"
+            # annotation indexes.
+
+            if [[ "${nb_callback_failures}" -ne 0 ]]; then
+                # Avoid integer overflow on return statuses (they are
+                # byte-long, i.e. returning 256 is equivalent to returning 0):
+                return 1
+            else
+                return 0
+            fi
         fi
 
         if [[ "${attempt_callback}" -eq 0 ]] || \
