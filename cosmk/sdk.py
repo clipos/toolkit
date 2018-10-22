@@ -75,12 +75,20 @@ class Sdk(object):
                 os.makedirs(os.path.join(repo_root_path(),
                                          out_subpath_for_action))
 
-            # Same for the cache subpath:
+            # Same for the cache subpath & package cache subpath:
             cache_subpath = action_targeted_recipe.cache_subpath
+            cache_subpath_for_action = os.path.join(cache_subpath, action_name)
+            cache_subpath_for_packages = os.path.join(cache_subpath, "binpkgs")
             if not os.path.exists(os.path.join(repo_root_path(),
-                                               cache_subpath)):
-                os.makedirs(os.path.join(repo_root_path(), cache_subpath))
+                                               cache_subpath_for_action)):
+                os.makedirs(os.path.join(repo_root_path(),
+                                         cache_subpath_for_action))
+            if not os.path.exists(os.path.join(repo_root_path(),
+                                               cache_subpath_for_packages)):
+                os.makedirs(os.path.join(repo_root_path(),
+                                         cache_subpath_for_packages))
 
+            # Always mount output & cache path for current action read-write.
             mntpoints += [
                 ContainerMountpoint(
                     source=os.path.join(repo_root_path(),
@@ -89,23 +97,35 @@ class Sdk(object):
                     options=["bind", "rw"],
                 ),
                 ContainerMountpoint(
-                    source=os.path.join(repo_root_path(), cache_subpath),
-                    target=os.path.join("/mnt", cache_subpath),
+                    source=os.path.join(repo_root_path(),
+                                        cache_subpath_for_action),
+                    target=os.path.join("/mnt", cache_subpath_for_action),
                     options=["bind", "rw"],
                 )
             ]
 
-        if (not writable_repo_root and self.writable_assets_dirs_at_build and
-                action_name == "build"):
-            for asset_dir in self.writable_assets_dirs_at_build:
-                subpath = os.path.join("assets", asset_dir)
+            if action_name == "bootstrap" or action_name == "build":
+                # Only build and bootstrap actions need read-write access to
+                # the package cache.
                 mntpoints += [
                     ContainerMountpoint(
-                        source=os.path.join(repo_root_path(), subpath),
-                        target=os.path.join("/mnt", subpath),
+                        source=os.path.join(repo_root_path(), cache_subpath_for_packages),
+                        target=os.path.join("/mnt", cache_subpath_for_packages),
                         options=["bind", "rw"],
                     )
                 ]
+
+                # Build and bootstrap actions may download assets
+                if self.writable_assets_dirs_at_build:
+                    for asset_dir in self.writable_assets_dirs_at_build:
+                        subpath = os.path.join("assets", asset_dir)
+                        mntpoints += [
+                            ContainerMountpoint(
+                                source=os.path.join(repo_root_path(), subpath),
+                                target=os.path.join("/mnt", subpath),
+                                options=["bind", "rw"],
+                            )
+                        ]
 
         return mntpoints
 
