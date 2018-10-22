@@ -369,25 +369,4 @@ project and interact easily with the Git repositories.
    ``source_me.sh``. It won't show up here until you have ``source``'d that
    specific file.
 
-``LICENSE``
------------
-
-The full text of the Lesser GNU Public License version 2.1.
-
-.. admonition:: Origin of this file
-   :class: tip
-
-   This file is symlinked at the root of the source tree by ``repo``.
-
-``README-FIRST``
-----------------
-
-A short document about how to get started once you have successfully fetched
-and synchonize the CLIP OS source tree on your development setup.
-
-.. admonition:: Origin of this file
-   :class: tip
-
-   This file is symlinked at the root of the source tree by ``repo``.
-
 .. vim: set tw=79 ts=2 sts=2 sw=2 et:
