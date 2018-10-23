@@ -189,7 +189,7 @@ __cosmk_bash_completion() {
             elif ! type complete >/dev/null 2>&1; then
                 echo >&2 " [*] Zsh-specific: Bash-compatible completion feature (bashcompinit) is not loaded."
                 echo >&2 "     Autoloading Bash-compatible completion feature..."
-                autoload bashcompinit
+                autoload -Uz bashcompinit
                 bashcompinit
                 if [ "$?" -ne 0 ]; then
                     echo >&2 " [!] Zsh-specific: Could not load bashcompinit."
