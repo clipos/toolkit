@@ -94,7 +94,8 @@ def run(cmd: Union[List[str], str],
         stderr: Optional[IO[AnyStr]] = None,
         stdouterr: Optional[IO[AnyStr]] = None,
         timeout: Optional[int] = None,
-        check: bool = True) -> None:
+        check: bool = True,
+        outside_of_virtualenv: bool = True) -> None:
     """Wrapper around the ``submodule.run`` function with capture of the output
     streams (``stdout``, ``stderr`` or both streams interlaced as one).
 
@@ -112,11 +113,44 @@ def run(cmd: Union[List[str], str],
     :param timeout: the time out value to apply to the command run
     :param check: raise an exception if the command exits with a non-null
         return value
+    :param outside_of_virtualenv: if running from a virtualenv, then this
+        parameter will strip all the parameters proper to the virtualenv from
+        the environment variable set to be given to the process to run
+
+    .. note::
+       The function detects if ``cosmk`` is run from a virtualenv by looking
+       the value of the ``VIRTUAL_ENV`` environment variable.
 
     :raise ValueError: if bad parameters are given to this function
     :raise SystemCommandError: in case of failure when executing the command
 
     """
+
+    # Inherit by default the environment of cosmk:
+    env = dict(os.environ)  # use dict to avoid modifying current environment
+
+    try:
+        if outside_of_virtualenv and env["VIRTUAL_ENV"]:
+            # Retrieve path to the virtualenv and all the items composing PATH:
+            venv_path = env["VIRTUAL_ENV"]
+            path_items = env["PATH"].split(":")
+            new_path_items = path_items[:]  # copy object to receive changes
+
+            # Iterate on the PATH items and strip all items beginning by the
+            # virtualenv path (using canonical paths):
+            for path_component in path_items:
+                if os.path.realpath(path_component).startswith(
+                        os.path.realpath(venv_path)):
+                    new_path_items.remove(path_component)
+
+            # Unset VIRTUAL_ENV and set new PATH (with virtualenv binaries path
+            # stripped):
+            del env["VIRTUAL_ENV"]
+            env['PATH'] = ':'.join(new_path_items)
+    except KeyError:
+        # if we land here, then either PATH or VIRTUAL_ENV is missing in the
+        # environment, proceed silently (even if this is strange...)
+        pass
 
     # split the command into a list of arguments as expected by subprocess
     cmd_split = shlex.split(cmd) if isinstance(cmd, str) else cmd
@@ -130,7 +164,7 @@ def run(cmd: Union[List[str], str],
                 """You cannot provide both file-object to capture any command
                 output and run the command in the current terminal."""))
         try:
-            subprocess.run(cmd_split, timeout=timeout, check=check)
+            subprocess.run(cmd_split, timeout=timeout, check=check, env=env)
         except FileNotFoundError:
             raise SystemCommandError(cmd_split, "Command not found in PATH")
         except subprocess.TimeoutExpired:
@@ -159,7 +193,7 @@ def run(cmd: Union[List[str], str],
                                 if not stdouterr else stdouterr)
                 subprocess.run(cmd_split, stdout=stdouterr_fp,
                                stderr=stdouterr_fp, timeout=timeout,
-                               check=check)
+                               check=check, env=env)
             except FileNotFoundError:
                 raise SystemCommandError(cmd_split,
                                          "Command not found in PATH")
@@ -186,7 +220,7 @@ def run(cmd: Union[List[str], str],
                                  if not stderr else stderr)
                     subprocess.run(cmd_split, stdout=stdout_fp,
                                    stderr=stderr_fp, timeout=timeout,
-                                   check=check)
+                                   check=check, env=env)
                 except FileNotFoundError:
                     raise SystemCommandError(cmd_split,
                                             "Command not found in PATH")
