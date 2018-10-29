@@ -14,6 +14,7 @@ filter_most() {
     if [[  "${REPO_PATH}" = "ci/"*
         || "${REPO_PATH}" = "manifest"
         || "${REPO_PATH}" = "src/external/"*
+        || "${REPO_PATH}" = "assets/"*
     ]]; then
         return
     fi
