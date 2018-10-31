@@ -157,6 +157,16 @@ keyid-format 0xlong
 utf8-strings
 EOF
 
+    # There is a length restriction on the GNUPGHOME path (see
+    # https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=847206). This length of
+    # maximum 108 chars may be easily exceeded when this script is called in a
+    # CI job context. Therefore we need to rely on another temporary location
+    # for the gpg-agent socket (and not the GNUPGHOME):
+    printf '%%Assuan%%\nsocket=/dev/shm/S.gpg-agent.tmp\n' > "${keyring_path}/S.gpg-agent"
+    printf '%%Assuan%%\nsocket=/dev/shm/S.gpg-agent.ssh.tmp\n' > "${keyring_path}/S.gpg-agent.ssh"
+    printf '%%Assuan%%\nsocket=/dev/shm/S.gpg-agent.extra.tmp\n' > "${keyring_path}/S.gpg-agent.extra"
+    printf '%%Assuan%%\nsocket=/dev/shm/S.gpg-agent.browser.tmp\n' > "${keyring_path}/S.gpg-agent.browser"
+
     local status=0
     # Bash-fu warning: The following construct is a hack to get around a
     # long-known bug with the errexit option (aka. set -e) in Bash subshells:
@@ -175,6 +185,10 @@ EOF
         # Export the GNUPG home for the following gpg commands in that subshell
         # (this variable exportation is limited to the current subshell):
         export GNUPGHOME="${keyring_path}"
+
+        # Attempt creation and connection to the gpg-agent with the parameters
+        # set above in the $GNUPGHOME/S.gpg-agent files:
+        gpg-connect-agent <<< 'GETINFO socket_name'
 
         gpg --fast-import -- "${pubkeys[@]}"
 
