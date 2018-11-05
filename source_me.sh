@@ -69,6 +69,7 @@ __prepare_toolkit_runtime_dir() {
 
 __check_shell_umask() {
     if [ -n "${NO_UMASK_WARNING:-}" ]; then
+        echo >&2 " [!] Current umask value check dismissed by request (NO_UMASK_WARNING variable set)."
         return 0
     fi
 
@@ -111,40 +112,53 @@ END_OF_BANNER
     esac
 }
 
-__check_git_lfs_properly_activated() {
+__check_lfs_repositories() {
+    # Do not process this check if told so:
     if [ -n "${NO_GIT_LFS_WARNING:-}" ]; then
+        echo >&2 " [!] Git LFS repositories check dismissed by request (NO_GIT_LFS_WARNING variable set)."
         return 0
     fi
 
-    # abort this check if git is not present in PATH
-    type git >/dev/null 2>&1 || return 0
+    # Abort this check if git is not present in PATH (this source tree may have
+    # been retrieved from an archive file):
+    if ! type git >/dev/null 2>&1; then
+        echo >&2 " [!] Git is missing in the current environment: Git LFS repositories check dismissed."
+        return 0
+    fi
 
-    # Git LFS filters must be set ideally at user configuration level
-    # (--global) or at system configuration level:
-    if ! type git-lfs >/dev/null 2>&1 || ! ( \
-            git config --global --get-regexp '^filter\.lfs\.' \
-                >/dev/null 2>&1 || \
-            git config --system --get-regexp '^filter\.lfs\.' \
-                >/dev/null 2>&1 ) ; then
+    # Likewise, abort this check if the source tree root is not backed by repo
+    # (the source tree may also have been reconstructed from an archive file):
+    if ! [ -d "${__path_to_repo_root}/.repo" ]; then
+        echo >&2 " [!] This source tree does not seem to be managed by repo: Git LFS repositories check dismissed."
+        return 0
+    fi
+
+    # Git is present and the source tree is backed by repo. We can therefore
+    # check for the good condition of the Git LFS-backed repositories:
+    if ! "${__path_to_toolkit}/helpers/check-lfs-repositories.sh" --quick; then
         echo >&2 # line break
         cat >&2 <<END_OF_BANNER
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   @                                                                         @
-  @   Warning! You seem to have forgotten to initialize Git LFS filters.    @
+  @      Warning! Some Git LFS-backed repositories seem to be missing       @
+  @     Git LFS objects (either downloaded or checked out in the tree).     @
   @                                                                         @
-  @ Git LFS filters declaration has not been found in the current Git       @
-  @ configuration (Side note: installing "git-lfs" might not be enough on   @
-  @ some Linux distributions). As a consequence, you *might* have           @
-  @ synchronized the CLIP OS source tree partially as some files in Git     @
-  @ LFS-backed repositories (such as the assets repositories) do not hold   @
-  @ the expected content (i.e., they are still Git LFS pointer files).      @
+  @ You may have synchronized the CLIP OS source tree without having        @
+  @ activated prior the Git LFS filters globally with the command "git lfs  @
+  @ install". As a consequence, you may have synchronized partially the     @
+  @ source tree as the files stored with Git LFS are still missing in the   @
+  @ concerned repositories.                                                 @
   @                                                                         @
-  @ Please make sure to have fetched and synchonized your source tree with  @
-  @ an initialized Git LFS setup and that all the files in the Git          @
-  @ LFS-backed repositories are not Git LFS pointer files anymore.          @
+  @ Please make sure you have fetched and synchonized your source tree in a @
+  @ Git LFS initialized environment. If this was not the case and if the    @
+  @ advertised Git LFS endpoint is reachable, you can simply run the        @
+  @ following command to finish the download of the missing Git LFS objects @
+  @ and checked them out properly in the source tree:                       @
   @                                                                         @
-  @ If you think this is not justified or you perfectly know what you are   @
-  @ doing, you can proceed by setting NO_GIT_LFS_WARNING=1 in your          @
+  @   $ repo forall -g lfs -c 'git lfs install && git lfs pull'             @
+  @                                                                         @
+  @ If you think this is not justified or if you perfectly know what you    @
+  @ are doing, you can proceed by setting NO_GIT_LFS_WARNING=1 in your      @
   @ environment to circumvent this check and then reinvoke the source       @
   @ command.                                                                @
   @ Otherwise, please read carefully the section relative the developer     @
@@ -155,6 +169,8 @@ __check_git_lfs_properly_activated() {
 END_OF_BANNER
         echo >&2 # line break
         return 1
+    else
+        echo >&2 " [*] Git LFS-backed repositories seem to be properly checked out."
     fi
 }
 
@@ -229,6 +245,7 @@ __sujust_alias() {
 }
 
 __symlink_repo_root_justfile() {
+    echo >&2 " [*] Symlinking the justfile dedicated to the source tree root into its expected location."
     ln -snf "toolkit/repo_root.justfile" "${__path_to_repo_root}/justfile"
 }
 
@@ -238,7 +255,7 @@ __check_current_user_not_root \
     && __check_not_already_in_venv \
     && __prepare_toolkit_runtime_dir \
     && __check_shell_umask \
-    && __check_git_lfs_properly_activated \
+    && __check_lfs_repositories \
     && __setup_and_activate_venv \
     && __cosmk_bash_completion \
     && __sujust_alias \
@@ -255,7 +272,7 @@ unset -f __check_current_user_not_root \
     __check_not_already_in_venv \
     __prepare_toolkit_runtime_dir \
     __check_shell_umask \
-    __check_git_lfs_properly_activated \
+    __check_lfs_repositories \
     __setup_and_activate_venv \
     __cosmk_bash_completion \
     __sujust_alias \
