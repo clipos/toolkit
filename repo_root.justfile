@@ -58,7 +58,7 @@ get-cache:
 
 # Helper command for 'repo forall -c <cmd>' output
 rfa +cmd:
-    repo forall -j 1 -c {{cmd}}
+    repo forall -j 1 -c "echo \$REPO_PROJECT; {{cmd}}; echo ''"
 
 # Helper command for pretty and selective 'repo forall -c <cmd>' output
 # Warning: 'cmd' can not include arguments with spaces
