@@ -257,9 +257,8 @@ On Arch Linux:
          runc sudo squashfs-tools \
          qemu libvirt bridge-utils dnsmasq \
          virt-manager ebtables \
-         debootstrap \
-         rust \
-         debian-archive-keyring
+         debootstrap debian-archive-keyring \
+         rust
 
 
 How to fetch the entire source tree?
