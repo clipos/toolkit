@@ -183,13 +183,17 @@ __setup_and_activate_venv() {
         if [ "$?" -eq 0 ]; then
             echo >&2 " [*] CLIP OS toolkit virtualenv successfully activated for the current shell."
         else
-            echo >&2 " [!] Unknown error: virtualenv activation failed."
-            echo >&2 "     Please read the log in \"run/virtualenv_activation.log\" at repo root level."
+            cat >&2 "${__path_to_runtime_dir}/virtualenv_activation.log"
+            echo >&2 # line break
+            echo >&2 " [!] Unknown error: virtualenv activation has failed."
+            echo >&2 "     The log output above is stored in \"run/virtualenv_activation.log\" (from the source tree root level)."
             return 1
         fi
     else
+        cat >&2 "${__path_to_runtime_dir}/virtualenv_setup.log"
+        echo >&2 # line break
         echo >&2 " [!] Virtualenv setup has failed."
-        echo >&2 "     Please read the log in \"run/virtualenv_setup.log\" at repo root level."
+        echo >&2 "     The log output above is stored in \"run/virtualenv_setup.log\" (from the source tree root level)."
         return 1
     fi
 }
