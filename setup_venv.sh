@@ -38,22 +38,16 @@ fi
 mkdir -p "${VENV}"
 python3 -m venv --symlinks --prompt "toolkit" "${VENV}"
 
-# Avoid the message "You are using pip version X, however version Y is
-# available.". We consider that we are always using a fairly recent version
-# (although not the latest one) of pip brought by the Python package of the
-# host Linux distribution.
-cat <<EOF > "${VENV}/pip.conf"
-[global]
-    disable_pip_version_check = 1
-EOF
-
-# The reason why we use --index-url='' is to prevent pip from fetching packages
-# (e.g. package dependencies) from PyPI automatically (and without our
-# knowledge).
+# The reason why we use --no-index is to prevent pip from fetching packages (or
+# any package dependency) from PyPI automatically (and without our knowledge).
 # In case of some missing dependencies, this will raise an error and will
 # enable us to take action.
-"${VENV}/bin/pip" install --index-url '' --find-links "file://${VENDOR}" \
-    -r "${REQUIREMENTS_TXT}"
+# The "--no-build-isolation" enables to force reinstall setuptools and pip
+# without them conflicting with each other (see
+# https://pip.pypa.io/en/stable/reference/pip_install/#cmdoption-no-build-isolation
+# and PEP 518).
+"${VENV}/bin/pip" install --no-index --find-links "file://${VENDOR}" \
+    --no-build-isolation -r "${REQUIREMENTS_TXT}"
 
 # Install the cosmk package in editable mode (aka. "setup.py develop" mode),
 # i.e. without installing it with copies of all the Python files in the
@@ -64,7 +58,7 @@ EOF
 # "--no-deps" flag) for cosmk as we check them further down and we
 # deliberatly trust the "requirements.txt" to include the dependencies for
 # cosmk.
-"${VENV}/bin/pip" install --no-deps --editable "${TOOLKIT}"
+"${VENV}/bin/pip" install --no-index --no-deps --editable "${TOOLKIT}"
 
 # Symlink the helper scripts available in the toolkit's "helpers" directory in
 # the "bin" directory of the virtualenv in order to make them appear via PATH.
