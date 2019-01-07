@@ -57,8 +57,7 @@ Here is a requirements check-list about your global environment:
       without issue.
 
 3. Both your hardware and your kernel must support **KVM** (through Intel
-   VT-x/VT-d or AMD-V/AMD-Vi technologies) to run CLIP OS virtual machine
-   images.
+   VT-x or AMD-V technologies) to run CLIP OS virtual machine images.
 
 4. **Super-user privileges** are required on punctual occasions through the use
    of the ``sudo`` utility.
