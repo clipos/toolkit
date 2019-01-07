@@ -64,7 +64,6 @@ setup(
             "mypy",
             "pylint",
             "radon",
-            "safety",
         ],
         # Documentation building related packages
         "docs": [

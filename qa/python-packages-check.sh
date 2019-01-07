@@ -14,11 +14,4 @@ fi
 echo >&2 "[pip] Checking that all the Python packages dependencies are satisfied..."
 "${VIRTUAL_ENV}/bin/pip" check
 
-echo >&2
-echo >&2 "===================================================================="
-echo >&2
-
-echo >&2 "[safety] Checking for Python packages known to have security vulnerabilities..."
-"${VIRTUAL_ENV}/bin/safety" check
-
 # vim: set ts=4 sts=4 sw=4 et ft=sh:
