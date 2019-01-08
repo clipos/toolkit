@@ -294,26 +294,32 @@ class Sdk(object):
                 os.chown(squashfs_path, uid, gid)
 
     def interactive_run(self,
-                        steps: List[str],
+                        recipe: 'recipe.Recipe',
+                        command: Optional[str] = None,
                         env: Optional[Dict[str, str]] = None,
                         shared_host_netns: bool = True,
                         writable_repo_root: bool = True) -> None:
-        """Run a command interactively in this SDK"""
+        """Run a command interactively in this SDK, in the given recipe
+        context"""
 
-        if not is_tty_attached():
-            raise CosmkError(
-                "not connected to a tty, cannot run a SDK interactively")
+        if not command:
+            if not is_tty_attached():
+                raise CosmkError(
+                    "not connected to a tty, cannot run a SDK interactively")
+
+            # Interactive Bash shell as login shell (in order to source
+            # /etc/profile):
+            command = "bash -li"
 
         with self.session(action_name="run",
-                          action_targeted_recipe=self.recipe,
+                          action_targeted_recipe=recipe,
                           writable_repo_root=writable_repo_root,
                           terminal=True,
                           env=env,
                           shared_host_netns=shared_host_netns) as sdk_sess:
-            for cmd in steps:
-                info("interactive run for SDK recipe {!r}, running:\n  {}"
-                    .format(self.recipe.identifier, cmd))
-                sdk_sess.run(cmd)
+            info("Running in {!r} with recipe {!r}: {}"
+                .format(self.recipe.identifier, recipe.identifier, command))
+            sdk_sess.run(command)
 
     @contextlib.contextmanager
     def session(self,

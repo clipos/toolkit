@@ -126,6 +126,13 @@ def main(as_module: bool = False) -> None:
         metavar="<recipe>",
         help="the recipe to run"
     ).completer = recipe_completer
+    run_sp.add_argument( # type: ignore
+        "command",
+        metavar="<command>",
+        nargs="*",
+        default=[],
+        help=line("""the command to run inside the SDK""")
+    )
 
     build_sp = subparsers.add_parser(
         "build",
@@ -284,6 +291,10 @@ def main(as_module: bool = False) -> None:
                 subcommand_kwargs = {
                     "clear_cache": args.clear_cache,
                     "clear_previous_build": not args.no_clear_previous_build,
+                }
+            if args.subcommand == 'run':
+                subcommand_kwargs = {
+                    "command": " ".join(args.command) if args.command else None,
                 }
             getattr(recipe, args.subcommand)(**subcommand_kwargs)
             sys.exit()

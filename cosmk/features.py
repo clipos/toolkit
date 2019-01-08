@@ -66,11 +66,12 @@ class RecipeFeature(object, metaclass=abc.ABCMeta):
 
 
 class RecipeRootFeature(RecipeFeature):
-    """Recipe feature for building rootfs from sources and binary packages"""
+    """Recipe feature for building rootfs from sources and binary packages.
+    Provides the 'run' attribute for development and debug."""
 
     NAME = "root"
 
-    FEATURED_ATTRIBUTES = {"build", "image"}
+    FEATURED_ATTRIBUTES = {"build", "image", "run"}
 
     SCHEMA = schema.Schema({
         "sdk": schema.Regex(RECIPE_IDENTIFIER_RE.pattern),
@@ -175,6 +176,21 @@ class RecipeRootFeature(RecipeFeature):
                 info("{!r} images recipe {!r}, runs:\n  {}".format(
                     sdk.recipe.identifier, self.recipe.identifier, cmd))
                 sess.run(self.replace_placeholders(cmd, sdk_context=True))
+
+    def run(self,
+            command: Optional[str] = None) -> None:
+        # using getattr to avoid static analyzers from complaining about
+        # missing attr (but brought by a recipe feature):
+        sdk = getattr(recipe.Recipe(self.recipe.config["sdk"]), "sdk")
+
+        sdk.interactive_run(
+            recipe=self.recipe,
+            command=command,
+            env={
+                key: self.replace_placeholders(value, sdk_context=True)
+                for key, value in self.recipe.config["root"]["env"].items()
+            },
+        )
 
 
 class RecipeConfigureFeature(RecipeFeature):
@@ -351,13 +367,6 @@ class RecipeSdkFeature(RecipeFeature):
             },
             "steps": [str],
         },
-        "run": {
-            schema.Optional("env", default={}): {
-                schema.Regex(ENVVAR_FORMAT_RE.pattern,
-                             error="Bad environment variable name"): str
-            },
-            "steps": schema.And([str], len),
-        },
         str: object,  # do not consider other keys
     })
 
@@ -378,15 +387,14 @@ class RecipeSdkFeature(RecipeFeature):
             },
         )
 
-    def run(self) -> None:
+    def run(self,
+            command: Optional[str] = None) -> None:
         self.sdk.interactive_run(
-            steps=[
-                self.replace_placeholders(step, sdk_context=True)
-                for step in self.recipe.config["run"]["steps"]
-            ],
+            recipe=self.recipe,
+            command=command,
             env={
                 key: self.replace_placeholders(value, sdk_context=True)
-                for key, value in self.recipe.config["run"]["env"].items()
+                for key, value in self.recipe.config["runtime"]["env"].items()
             },
         )
 
