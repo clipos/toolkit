@@ -297,7 +297,7 @@ class Sdk(object):
                         steps: List[str],
                         env: Optional[Dict[str, str]] = None,
                         shared_host_netns: bool = True,
-                        writable_repo_root: bool = False) -> None:
+                        writable_repo_root: bool = True) -> None:
         """Run a command interactively in this SDK"""
 
         if not is_tty_attached():
