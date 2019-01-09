@@ -223,7 +223,7 @@ for Debian):
 .. code-block:: shell-session
 
    $ sudo apt install \
-          python3.6 python3.6-dev python3-venv \
+          python3 python3-dev python3-venv \
           gnupg2 repo git git-lfs openssh-client \
           build-essential pkg-config \
           runc sudo squashfs-tools \
