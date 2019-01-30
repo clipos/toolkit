@@ -73,8 +73,8 @@ class RecipeRootFeature(RecipeFeature):
     FEATURED_ATTRIBUTES = {"build", "image"}
 
     SCHEMA = schema.Schema({
+        "sdk": schema.Regex(RECIPE_IDENTIFIER_RE.pattern),
         "root": {
-            "sdk": schema.Regex(RECIPE_IDENTIFIER_RE.pattern),
             schema.Optional("env", default={}): {
                 schema.Regex(ENVVAR_FORMAT_RE.pattern,
                              error="Bad environment variable name"): str
@@ -100,7 +100,7 @@ class RecipeRootFeature(RecipeFeature):
 
         # using getattr to avoid static analyzers from complaining about
         # missing attr (but brought by a recipe feature):
-        sdk = getattr(recipe.Recipe(self.recipe.config["root"]["sdk"]), "sdk")
+        sdk = getattr(recipe.Recipe(self.recipe.config["sdk"]), "sdk")
 
         action_out_subpath = os.path.join(self.recipe.out_subpath, "build")
         action_out_path = os.path.join(repo_root_path(), action_out_subpath)
@@ -145,7 +145,7 @@ class RecipeRootFeature(RecipeFeature):
 
         # using getattr to avoid static analyzers from complaining about
         # missing attr (but brought by a recipe feature):
-        sdk = getattr(recipe.Recipe(self.recipe.config["root"]["sdk"]), "sdk")
+        sdk = getattr(recipe.Recipe(self.recipe.config["sdk"]), "sdk")
 
         action_out_subpath = os.path.join(self.recipe.out_subpath, "image")
         action_out_path = os.path.join(repo_root_path(), action_out_subpath)
@@ -186,8 +186,8 @@ class RecipeConfigureFeature(RecipeFeature):
     FEATURED_ATTRIBUTES = {"configure"}
 
     SCHEMA = schema.Schema({
+        "sdk": schema.Regex(RECIPE_IDENTIFIER_RE.pattern),
         "configure": {
-            "sdk": schema.Regex(RECIPE_IDENTIFIER_RE.pattern),
             schema.Optional("env", default={}): {
                 schema.Regex(ENVVAR_FORMAT_RE.pattern,
                              error="Bad environment variable name"): str
@@ -203,8 +203,7 @@ class RecipeConfigureFeature(RecipeFeature):
 
         # using getattr to avoid static analyzers from complaining about
         # missing attr (but brought by a recipe feature):
-        sdk = getattr(recipe.Recipe(self.recipe.config["configure"]["sdk"]),
-                      "sdk")
+        sdk = getattr(recipe.Recipe(self.recipe.config["sdk"]), "sdk")
 
         # the recipe to configure (i.e. what is the recipe for which we need to
         # get image-resulting root tree on which running the configuration
@@ -277,8 +276,8 @@ class RecipeBundleFeature(RecipeFeature):
     FEATURED_ATTRIBUTES = {"bundle"}
 
     SCHEMA = schema.Schema({
+        "sdk": schema.Regex(RECIPE_IDENTIFIER_RE.pattern),
         "bundle": {
-            "sdk": schema.Regex(RECIPE_IDENTIFIER_RE.pattern),
             schema.Optional("env", default={}): {
                 schema.Regex(ENVVAR_FORMAT_RE.pattern,
                              error="Bad environment variable name"): str
@@ -291,8 +290,7 @@ class RecipeBundleFeature(RecipeFeature):
     def bundle(self) -> None:
         # using getattr to avoid static analyzers from complaining about
         # missing attr (but brought by a recipe feature):
-        sdk = getattr(recipe.Recipe(self.recipe.config["bundle"]["sdk"]),
-                      "sdk")
+        sdk = getattr(recipe.Recipe(self.recipe.config["sdk"]), "sdk")
 
         action_out_subpath = os.path.join(self.recipe.out_subpath, "bundle")
         action_out_path = os.path.join(repo_root_path(), action_out_subpath)

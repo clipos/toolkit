@@ -128,6 +128,8 @@ class Recipe(object):
                 schema.Or(*(featclass.NAME for featclass in
                             features.RecipeFeature.__subclasses__())),
             ],
+            # All recipes have SDK except for SDK recipes
+            schema.Optional("sdk"): schema.Regex(RECIPE_IDENTIFIER_RE.pattern),
             # other keys must be dict and will be validated by recipe features
             # validation methods
             str: dict,
