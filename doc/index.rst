@@ -9,6 +9,7 @@
 
    toolkit/setup
    toolkit/build
+   toolkit/build-steps
    toolkit/source-tree
 
 .. toctree::
