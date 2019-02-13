@@ -50,7 +50,11 @@ extensions = [
 ]
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+# templates_path = ['_templates']
+
+# Add static CSS for colors
+def setup(app):
+    app.add_stylesheet('css/colors.css')
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
@@ -201,3 +205,5 @@ intersphinx_mapping = {'https://docs.python.org/3/': None}
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = True
+
+# vim: set et ts=4 sts=4 sw=4 tw=79:
