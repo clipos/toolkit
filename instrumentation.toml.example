@@ -15,6 +15,12 @@
 # Note 2: If instrumentation is requested for at least one recipe, then the
 # product version will be tainted with an "instrumented" tag as a SemVer build
 # metadata (e.g. "X.Y.Z+instrumented").
+#
+# For a reference of all the effects of each instrumentation level per recipe,
+# please refer to the appropriate page of the CLIP OS product documentation:
+# https://docs.clip-os.org/clipos/development.html#effect-of-instrumentation-levels
+# The other products (i.e. CLIP OS derivatives) should have their own
+# documentation with their own instrumentation levels reference.
 
 # Recipes that shall be produced instrumented for use by a developer:
 #
@@ -24,6 +30,8 @@
 # or means to develop new features or enhance that recipe.
 development = [
     "clipos/core",
+    "clipos/efiboot",
+    "clipos/qemu",
 ]
 
 # Recipes that shall be produced instrumented for debugging investigations:
@@ -33,7 +41,6 @@ development = [
 # build of some consequent parts of the recipe to use a compilation mode with
 # debugging features (e.g. symbols) for further bug investigations.
 debug = [
-    "clipos/efiboot",
 ]
 
 # vim: set ts=4 sts=4 sw=4 et ft=toml:
