@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: LGPL-2.1-or-later
-# Copyright © 2017-2018 ANSSI. All rights reserved.
+# Copyright © 2017 ANSSI. All rights reserved.
 
 """Miscellanous utility functions and helpers that may be used globally in this
 package."""

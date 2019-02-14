@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
-# Copyright (C) 2017-2018 ANSSI
-# All rights reserved
+# Copyright © 2017 ANSSI. All rights reserved.
 
 """This module manages all the code logic relative to the creation and
 management of the CLIP OS virtualized environments with `libvirt`."""

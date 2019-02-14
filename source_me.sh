@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: LGPL-2.1-or-later
-# Copyright © 2017-2018 ANSSI. All rights reserved.
+# Copyright © 2017 ANSSI. All rights reserved.
 
 # Script to be sourced to setup the interactive shell environment of the user
 # to allow him/her to use the whole CLIP OS toolkit easily (cosmk with the

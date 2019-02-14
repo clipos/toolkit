@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: LGPL-2.1-or-later
-# Copyright © 2017-2018 ANSSI. All rights reserved.
+# Copyright © 2017 ANSSI. All rights reserved.
 
 # This script checks that the Git LFS backed repositories (those repositories
 # must be part of the repo group "lfs", see the manifest file) have all the Git
