@@ -8,9 +8,11 @@
 Build steps
 ===========
 
-This page details the purpose of each step in the project build process.
-Running steps manually is generally not needed for development as you may use
-directly the instructions from the :ref:`Building page <build>`.
+.. important::
+
+   This page details the purpose of each step in the project build process.
+   Running steps manually is generally not needed for development as you may
+   use directly the instructions from the :ref:`Building page <build>`.
 
 Building the documentation
 --------------------------

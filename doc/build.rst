@@ -27,8 +27,21 @@ to use the cosmk Python module and its associated tools (such as the
    $ source toolkit/source_me.sh
    (toolkit) $
 
+Building the full project
+-------------------------
+
 You will then be able to use the ``justfile``'s to run commands to build CLIP
-OS:
+OS. Building the CLIP OS project requires multiple successive steps that are
+described in `Justfiles <https://github.com/casey/just>`_. All commands are run
+from the project root directory.
+
+To list the available `just` recipes:
+
+.. code-block:: shell-session
+
+   (toolkit) $ just --list
+
+To run all steps required to build CLIP OS:
 
 .. code-block:: shell-session
 
@@ -60,25 +73,6 @@ OS:
    .. code-block:: shell-session
 
       $ export PATH="$PATH:/sbin:/usr/sbin"
-
-Building the full project
--------------------------
-
-Building the CLIP OS project requires multiple successive steps that are
-described in `Justfiles <https://github.com/casey/just>`_. All commands are run
-from the project root directory.
-
-To list the available `just` recipes:
-
-.. code-block:: shell-session
-
-   (toolkit) $ just --list
-
-To run all steps required to build CLIP OS:
-
-.. code-block:: shell-session
-
-   (toolkit) $ sujust all
 
 Building a QEMU image and running using QEMU/KVM
 ------------------------------------------------
