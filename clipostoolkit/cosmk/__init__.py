@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: LGPL-2.1-or-later
 # Copyright © 2017 ANSSI. All rights reserved.
 
-"""The CLI tool of the CLIP OS toolkit
+"""The CLIP OS build tool.
 
 .. warning::
     **This module has side-effects on the Python runtime!**
@@ -58,29 +58,7 @@
 import os
 import warnings
 
-# The only place where the version of this Python package is defined (setup.py
-# reparses only this line for setuptools). This versioning follows semver.
-__version__ = "0.1.0"
-
-# Easy access to main objects (classes, modules, functions) of this package
-__all__ = [
-    "commons",
-    "completion",
-    "container",
-    "exceptions",
-    "features",
-    "fs",
-    "healthcheck",
-    "instrumentation",
-    "log",
-    "mount",
-    "privileges",
-    "product",
-    "recipe",
-    "sdk",
-    "sourcetree",
-    "virt",
-]
+from .. import __version__ as clipostoolkit_version
 
 # Automatic privileges lowering if this module has been imported from a Python
 # privileged runtime:
@@ -97,6 +75,6 @@ if os.geteuid() == 0 and os.getegid() == 0:
         privileges.init_lower_privileges(uid, gid)
 
 # Initialize the logging facility for this module (one logger for the whole
-# cosmk package).
+# cosmk subpackage).
 from . import log
 logger = log._create_logger(__name__)

@@ -10,7 +10,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-cosmk = {editable = true, path = ".", extras = ["qa", "docs"]}
+clipostoolkit = {editable = true, path = ".", extras = ["qa", "docs"]}
 
 [dev-packages]
 ipython = "*"

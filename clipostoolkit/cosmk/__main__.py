@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: LGPL-2.1-or-later
 # Copyright © 2017 ANSSI. All rights reserved.
 
-"""The CLIP OS toolkit command line utility"""
+"""cosmk: The CLIP OS (and derivatives) build tool"""
 
 import argparse
 import atexit

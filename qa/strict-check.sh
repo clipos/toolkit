@@ -17,24 +17,24 @@ if [[ -z "${REPOROOT}" || "$?" -ne 0 ]]; then
     exit 1
 fi
 
-echo >&2 "[pylint] Checking cosmk package for errors (warnings dismissed)..."
+echo >&2 "[pylint] Checking clipostoolkit package for errors (warnings dismissed)..."
 "${VIRTUAL_ENV}/bin/pylint" \
     --rcfile "${REPOROOT}/toolkit/qa/pylintrc" \
-    -E cosmk
+    -E clipostoolkit
 
 echo >&2
 echo >&2 "===================================================================="
 echo >&2
 
-echo >&2 "[mypy] Checking types statically in cosmk package..."
+echo >&2 "[mypy] Checking types statically in clipostoolkit package..."
 # HACK: mypy does not seem to locate packages installed as "editable" (i.e.
 # installed with "setup.py develop" or with "pip install --editable").
-# Therefore we need to help it by setting the path to the cosmk package
+# Therefore we need to help it by setting the path to the clipostoolkit package
 # (actually the parent directory where the package dir can be found) in the
 # variable MYPYPATH:
 export MYPYPATH="${REPOROOT}/toolkit"
 "${VIRTUAL_ENV}/bin/mypy" \
     --config-file "${REPOROOT}/toolkit/qa/mypy.ini" \
-    --package cosmk
+    --package clipostoolkit
 
 # vim: set ts=4 sts=4 sw=4 et ft=sh:

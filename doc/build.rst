@@ -19,8 +19,8 @@ Activate the toolkit environment
 --------------------------------
 
 Create and activate the CLIP OS toolkit environment in which you will be able
-to use the cosmk Python module and its associated tools (such as the
-``justfile``'s):
+to use all the CLIP OS tools required to build and conveniently manage the
+source tree (such as ``just`` to handle the ``justfile``'s and ``cosmk``):
 
 .. code-block:: shell-session
 
@@ -57,12 +57,12 @@ To run all steps required to build CLIP OS:
 .. note::
 
    On most distributions, the default configuration will reset the
-   ``PATH`` environment variable set by ``cosmk`` to a fixed default value
-   when calling ``sudo``.
+   ``PATH`` environment variable set by the CLIP OS toolkit environment to a
+   fixed default value when calling ``sudo``.
 
    To workaround this issue without modifying your ``sudoers`` configuration,
-   the ``cosmk`` environment sets an alias for the sudo command to keep your
-   current ``PATH``.
+   the CLIP OS toolkit environment sets an alias for the sudo command to keep
+   your current ``PATH``.
 
 .. note::
 

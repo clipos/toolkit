@@ -73,7 +73,8 @@ Here is a requirements check-list about your global environment:
       lower its effective privileges when root privileges are not necessary.
 
       For more information, see the implementation of the class
-      `cosmk.privileges.ElevatedPrivileges` in :ref:`cosmk`.
+      `clipostoolkit.cosmk.privileges.ElevatedPrivileges` in
+      :ref:`cosmk-api`.
 
 5. Make sure to have allocated a consequent size of **swap space** on your
    system as it might be required when working on large ephemeral SDK

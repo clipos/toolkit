@@ -49,15 +49,15 @@ python3 -m venv --symlinks --prompt "toolkit" "${VENV}"
 "${VENV}/bin/pip" install --no-index --find-links "file://${VENDOR}" \
     --no-build-isolation -r "${REQUIREMENTS_TXT}"
 
-# Install the cosmk package in editable mode (aka. "setup.py develop" mode),
-# i.e. without installing it with copies of all the Python files in the
-# "site-packages" dir. This will allow us to work on the cosmk source code
-# without having to constantly reinstall the package each time a change is made
-# in this source code.
+# Install the clipostoolkit Python package in editable mode (aka. "setup.py
+# develop" mode), i.e. without installing it with copies of all the Python
+# files in the "site-packages" dir. This will allow us to work on the
+# clipostoolkit package source code without having to constantly reinstall the
+# package each time a change is made in this codebase.
 # Also, do not leave setuptools fetch and install dependencies (hence the
-# "--no-deps" flag) for cosmk as we check them further down and we
-# deliberatly trust the "requirements.txt" to include the dependencies for
-# cosmk.
+# "--no-deps" flag) for clipostoolkit package as we check them further down and
+# we deliberatly trust the "requirements.txt" to include explicitly all the
+# dependencies for clipostoolkit package.
 "${VENV}/bin/pip" install --no-index --no-deps --editable "${TOOLKIT}"
 
 # Symlink the helper scripts available in the toolkit's "helpers" directory in

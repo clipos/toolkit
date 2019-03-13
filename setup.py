@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: LGPL-2.1-or-later
 # Copyright © 2017 ANSSI. All rights reserved.
 
-# Setup script for cosmk
+# Setup script for the CLIP OS toolkit
 
 import codecs
 import os
@@ -12,7 +12,7 @@ import sys
 from setuptools import setup
 
 if not sys.version_info >= (3, 6):
-    raise RuntimeError("cosmk package requires Python 3.6 or higher.")
+    raise RuntimeError("The CLIP OS toolkit requires Python 3.6 or higher.")
 
 # This current file:
 here = os.path.abspath(os.path.dirname(__file__))
@@ -31,19 +31,19 @@ def find_version(*file_paths):
     raise RuntimeError("Unable to find version string.")
 
 setup(
-    name="cosmk",
-    version=find_version("cosmk", "__init__.py"),
-    description="The CLIP OS toolkit command line utility",
+    name="CLIPOS_Toolkit",
+    version=find_version("clipostoolkit", "__init__.py"),
+    description="The CLIP OS toolkit",
     url="https://www.clip-os.org/",
     author="ANSSI",
     author_email="clipos@ssi.gouv.fr",
     python_requires='>=3.6',
     packages=[
-        "cosmk",
+        "clipostoolkit",
     ],
     package_data={
-        "cosmk": [
-            # Marker file labelling cosmk as inline type annotated (PEP 561)
+        "clipostoolkit": [
+            # Marker file labelling clipostoolkit as inline type annotated (PEP 561)
             "py.typed",
         ]
     },
@@ -74,7 +74,7 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "cosmk=cosmk.__main__:main",
+            "cosmk=clipostoolkit.cosmk.__main__:main",
         ],
     },
 )

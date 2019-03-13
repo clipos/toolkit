@@ -259,8 +259,9 @@ The recipe describing the CLIP OS *EFI boot* items.
 ``run/``
 --------
 
-Runtime working directory for the ``cosmk`` toolkit and Python virtual
-environment.
+Runtime working directory for the CLIP OS toolkit utilities (i.e. the Python
+virtual environment location, some tools part of the toolkit working directory,
+etc.).
 
 ``src/``
 --------
@@ -325,23 +326,24 @@ The CLIP OS toolkit.
      root) *justfile*.
    * ``source_me.sh``: The script to source to setup the Python virtualenv.
 
-``tookit/cosmk/``
-~~~~~~~~~~~~~~~~~~~~
+``toolkit/clipostoolkit/``
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The Python module used to setup and launch SDKs to build CLIP OS.
+The Python package/module containing all the source code for the CLIP OS build
+and source tree management tools developed in Python.
 
-``tookit/doc/``
-~~~~~~~~~~~~~~~
+``toolkit/doc/``
+~~~~~~~~~~~~~~~~
 
 The toolkit documentation.
 
-``tookit/docroot/``
-~~~~~~~~~~~~~~~~~~~
+``toolkit/docroot/``
+~~~~~~~~~~~~~~~~~~~~
 
 The root and configuration files used to build the full CLIP OS documentation.
 
-``tookit/helpers/``
-~~~~~~~~~~~~~~~~~~~
+``toolkit/helpers/``
+~~~~~~~~~~~~~~~~~~~~
 
 This directory contains all the helpers scripts that are of particular interest
 for the project development common tasks. These tasks include (but are not
@@ -358,15 +360,15 @@ source tree or for verifying the OpenPGP signatures of the Git commits).
    script), the scripts under this directory are exposed in the environment
    ``PATH`` thanks to symbolic links in the CLIP OS toolkit virtualenv.
 
-``tookit/qa/``
-~~~~~~~~~~~~~~
+``toolkit/qa/``
+~~~~~~~~~~~~~~~
 
 This directory contains wrapper scripts and resources (e.g. configuration files
 for common Python checker tools such as *mypy* or *pylint*) used for quality
 assurance of the CLIP OS toolkit.
 
-``tookit/maintenance/``
-~~~~~~~~~~~~~~~~~~~~~~~
+``toolkit/maintenance/``
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 This directory contains scripts useful to the CLIP OS toolkit developer for the
 maintenance of the CLIP OS toolkit (e.g., bumping and vendoring the required

@@ -18,7 +18,7 @@ if [[ -z "${REPOROOT}" || "$?" -ne 0 ]]; then
 fi
 
 echo >&2 "[pyflakes] Simple code analysis..."
-"${VIRTUAL_ENV}/bin/pyflakes" "${REPOROOT}/toolkit/cosmk" || true
+"${VIRTUAL_ENV}/bin/pyflakes" "${REPOROOT}/toolkit/clipostoolkit" || true
 
 echo >&2
 echo >&2 "===================================================================="
@@ -27,7 +27,7 @@ echo >&2
 echo >&2 "[pylint] Code quality analysis (custom pylint configuration)..."
 "${VIRTUAL_ENV}/bin/pylint" \
     --rcfile "${REPOROOT}/toolkit/qa/pylintrc" \
-    --reports=yes cosmk || true
+    --reports=yes clipostoolkit || true
 
 echo >&2
 echo >&2 "===================================================================="
@@ -35,13 +35,13 @@ echo >&2
 
 echo >&2 "[radon] Cyclomatic complexity report"
 "${VIRTUAL_ENV}/bin/radon" cc --show-complexity --average \
-    "${REPOROOT}/toolkit/cosmk"
+    "${REPOROOT}/toolkit/clipostoolkit"
 
 echo >&2
 echo >&2 "===================================================================="
 echo >&2
 
 echo >&2 "[radon] Maintanability index report"
-"${VIRTUAL_ENV}/bin/radon" mi --show --sort "${REPOROOT}/toolkit/cosmk"
+"${VIRTUAL_ENV}/bin/radon" mi --show --sort "${REPOROOT}/toolkit/clipostoolkit"
 
 # vim: set ts=4 sts=4 sw=4 et ft=sh:

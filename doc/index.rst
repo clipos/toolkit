@@ -20,9 +20,9 @@
    toolkit/derive
 
 .. toctree::
-   :caption: API & Reference
+   :caption: Toolkit API references
    :maxdepth: 1
 
-   toolkit/cosmk
+   toolkit/cosmk-api
 
 .. vim: set tw=79 ts=2 sts=2 sw=2 et:
