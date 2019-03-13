@@ -7,7 +7,8 @@ import os
 import re
 import sys
 from enum import Enum
-from typing import Any, Dict, Iterable, Optional, Text, Tuple, Union
+from typing import (Any, Dict, Iterable, MutableMapping, Optional, Text, Tuple,
+                    Union)
 
 import schema
 import toml
@@ -45,7 +46,7 @@ def instrumented_recipes() -> Dict[str, InstrumentationLevel]:
 
     try:
         with open(instru_filepath, "r") as instru_fp:
-            instru: Dict[str, Any] = toml.load(instru_fp)
+            instru: MutableMapping[str, Any] = toml.load(instru_fp)
     except:
         raise InstrumentationSpecificationError(line(
             """Cannot open or parse as TOML the "instrumentation.toml" file

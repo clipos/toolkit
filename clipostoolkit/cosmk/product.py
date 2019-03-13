@@ -5,7 +5,7 @@
 
 import os
 import re
-from typing import Any, Dict, Iterator, Optional, Tuple
+from typing import Any, Dict, Iterator, MutableMapping, Optional, Tuple
 
 import schema
 import semver
@@ -49,7 +49,7 @@ class Product(object):
         debug("Parsing {!r}...".format(self.properties_path))
         try:
             with open(self.properties_path, "r") as proptoml:
-                prop_dict: Dict[str, Any] = toml.load(proptoml)
+                prop_dict: MutableMapping[str, Any] = toml.load(proptoml)
         except:
             raise ProductPropertiesError(
                 "Cannot parse or open \"properties.toml\" properties file.")
@@ -83,7 +83,9 @@ class Product(object):
 
         return str(semver.VersionInfo(**version))
 
-    def validate_properties(self, prop_dict: Dict[str, Any]) -> ProductProperties:
+    def validate_properties(self,
+                            prop_dict: MutableMapping[str, Any],
+                           ) -> ProductProperties:
         """Validate the data structure of the product properties file
         ("properties.toml") and reorganize them into a "flattened"
         :py:data:`dict`.

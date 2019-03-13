@@ -6,7 +6,7 @@
 import os
 import re
 from functools import partialmethod
-from typing import Any, Dict, Type
+from typing import Any, Dict, MutableMapping, Type
 
 import schema
 import toml
@@ -24,7 +24,7 @@ from .sourcetree import repo_root_path
 # Disabled because mypy do not support yet recursive types :(
 #RecipeConfig = Dict[str, 'RecipeConfigItem']
 #RecipeConfigItem = Union[RecipeConfig, str, int, List[str], List[int]]
-RecipeConfig = Dict[str, Any]
+RecipeConfig = MutableMapping[str, Any]
 RecipeConfigItem = Any
 
 

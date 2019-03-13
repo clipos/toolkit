@@ -77,8 +77,8 @@ def linux_version() -> Tuple[int,int,int]:
                                platform.release())
         # ignore type checking on the following because all exceptions are
         # caught if this ever fails:
-        major = int(kver_split.group(1))
-        minor = int(kver_split.group(2))
+        major = int(kver_split.group(1))  # type: ignore
+        minor = int(kver_split.group(2))  # type: ignore
         micro = int(kver_split.group(4)) if kver_split.group(3) else 0 # type: ignore
     except:
         raise CosmkEnvironmentError(

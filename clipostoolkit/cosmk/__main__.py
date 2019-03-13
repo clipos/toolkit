@@ -126,7 +126,7 @@ def main(as_module: bool = False) -> None:
         metavar="<recipe>",
         help="the recipe to run"
     ).completer = recipe_completer
-    run_sp.add_argument( # type: ignore
+    run_sp.add_argument(
         "command",
         metavar="<command>",
         nargs="*",
