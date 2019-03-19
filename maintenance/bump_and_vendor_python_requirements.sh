@@ -33,7 +33,14 @@ destroy_tmp_venv
 python3 -m venv --symlinks "${TMP_VENV}"
 
 echo >&2 "Force to have to up-to-date pip in the virtualenv."
-"${TMP_VENV}/bin/pip" install --no-cache --no-binary :all: --upgrade --force-reinstall pip
+# 2019-03-19: There is currently a bug in Pip 19 that prevent us from using the
+# option "--no-binary :all:" with packages that make us of PEP 517 build system
+# (e.g. flit). Pip raises then a ModuleNotFoundError for "setuptools" and this
+# whole script miserably fails because a package (in our case "flit") cannot be
+# installed in our temporary virtualenv.
+# Therefore the restriction on Pip below. This restriction could be remove once
+# this bug will be fixed (see https://github.com/pypa/pip/issues/6222 ).
+"${TMP_VENV}/bin/pip" install --no-cache --no-binary :all: --upgrade --force-reinstall 'pip<19'
 
 echo >&2 "Install the CLIP OS toolkit in that temporary virtualenv."
 "${TMP_VENV}/bin/pip" install --no-cache --no-binary :all: --editable "${TOOLKIT}/.[qa,docs]"
