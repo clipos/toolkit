@@ -127,6 +127,32 @@ class Sdk(object):
                             )
                         ]
 
+        # There is a long-known bug between OverlayFS and GNU tar (see:
+        # https://github.com/coreos/bugs/issues/1095) that make GNU tar fail
+        # with an error "Directory renamed before its status could be
+        # extracted". However, Portage works a lot with GNU tar for its creation
+        # and extraction of binary packages, especially in /var/tmp and this
+        # directory actually sits on top of the overlayfs container mountpoint
+        # that constitutes the root filesystem of the container. Hence the bug
+        # previously mentioned can affect us.
+        # Therefore we decide not to rely on the fact that the upperdir of the
+        # rootfs of the container is a tmpfs for both /tmp and /var/tmp (in the
+        # container) and we mount those points as normal tmpfs mountpoints:
+        mntpoints += [
+            ContainerMountpoint(
+                source="tmpfs",
+                target="/tmp",
+                type="tmpfs",
+                options=["nodev", "nosuid"],
+            ),
+            ContainerMountpoint(
+                source="tmpfs",
+                target="/var/tmp",
+                type="tmpfs",
+                options=[],  # no mount options for Portage
+            ),
+        ]
+
         return mntpoints
 
     def bootstrap(self,
