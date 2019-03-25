@@ -51,7 +51,6 @@ setup(
     # Dependencies required:
     install_requires=[
         "argcomplete",
-        "libvirt-python",
         "GitPython",
         "psutil",
         "schema",

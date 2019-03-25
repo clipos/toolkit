@@ -22,7 +22,6 @@ from .log import critical, debug, error, info, warn
 from .privileges import ElevatedPrivileges
 from .sdk import Sdk
 from .sourcetree import repo_root_path
-from .virt import VirtualizedEnvironment
 
 
 class RecipeFeature(object, metaclass=abc.ABCMeta):
@@ -435,84 +434,3 @@ class RecipeSdkFeature(RecipeFeature):
             writable_assets_dirs_at_build=(
                 self.recipe.config["runtime"]["writable_assets_dirs_at_build"])
         )
-
-
-class RecipeVirtualizedEnvironmentFeature(RecipeFeature):
-    """Recipe feature for creating, running and cleaning virtualized
-    environment created from other recipe feature results."""
-
-    NAME = "virt"
-
-    FEATURED_ATTRIBUTES = {"spawn",  "create", "destroy"}
-
-    SCHEMA = schema.Schema({
-        "virt": {
-            "xml_domain_template": schema.And(str, len),
-            "ovmf_code": schema.And(str, len),
-            "ovmf_vars_template": schema.And(str, len),
-            "qcow2_main_disk_image": schema.And(str, len),
-        },
-        str: object,  # do not consider other keys
-    })
-
-    @property
-    def virtualized_environment(self) -> VirtualizedEnvironment:
-        # When doing TPM emulation, libvirt passes the guest name to swtpm,
-        # which then uses it as a CN, for which '+' signs have a special
-        # meaning.
-        name="{}-{}_{}".format(self.recipe.product.name,
-                               self.recipe.name,
-                               self.recipe.product.tainted_version).replace('+', '--')
-        return VirtualizedEnvironment(
-            name=name,
-            libvirt_domain_xml_template=self.replace_placeholders(
-                self.recipe.config["virt"]["xml_domain_template"],
-                sdk_context=False),
-            qcow2_main_disk_image=self.replace_placeholders(
-                self.recipe.config["virt"]["qcow2_main_disk_image"],
-                sdk_context=False),
-            ovmf_firmware_code=self.replace_placeholders(
-                self.recipe.config["virt"]["ovmf_code"],
-                sdk_context=False),
-            ovmf_firmware_vars_template=self.replace_placeholders(
-                self.recipe.config["virt"]["ovmf_vars_template"],
-                sdk_context=False),
-        )
-
-    def spawn(self,
-              destroy_preexisting: bool = False,
-              spawn_virt_manager_console: bool = True) -> None:
-        virtenv = self.virtualized_environment
-        virtenv.create(start=True, destroy_preexisting=destroy_preexisting)
-        if spawn_virt_manager_console:
-            info(line("""Spawning graphical virtual machine manager
-                      (\"virt-manager\")..."""))
-            virtenv.spawn_virt_manager_console()
-        try:
-            info("Interrupt the virtual machine with Control+C (SIGINT).\n" +
-                 line("""Note: this will kill the virtual machine and cleanup
-                      the libvirt domain."""))
-            signal.pause()
-        except KeyboardInterrupt:
-            virtenv.destroy()
-
-    def create(self,
-               destroy_preexisting: bool = False,
-               spawn_virt_manager_console: bool = False) -> None:
-        virtenv = self.virtualized_environment
-        virtenv.create(start=False, destroy_preexisting=destroy_preexisting)
-        if spawn_virt_manager_console:
-            info(line(
-                """Spawning graphical virtual machine manager
-                (\"virt-manager\")..."""))
-            virtenv.spawn_virt_manager_console()
-
-    def destroy(self) -> None:
-        virtenv = self.virtualized_environment
-        virtenv.destroy()
-
-
-class RecipeSignatureFeature(RecipeFeature):
-    """Recipe feature for XXX"""
-
-    NAME = "sign"

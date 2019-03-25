@@ -187,36 +187,6 @@ def main(as_module: bool = False) -> None:
         help="the recipe to bundle"
     ).completer = recipe_completer
 
-    spawn_sp = subparsers.add_parser(
-        "spawn",
-        help="spawns a virtual machine described by a recipe"
-    )
-    spawn_sp.add_argument(  # type: ignore
-        "recipe",
-        metavar="<recipe>",
-        help="the virtual machine recipe to spawn"
-    ).completer = recipe_completer
-
-    create_sp = subparsers.add_parser(
-        "create",
-        help="creates a virtual machine described by a recipe"
-    )
-    create_sp.add_argument(  # type: ignore
-        "recipe",
-        metavar="<recipe>",
-        help="the virtual machine recipe to create"
-    ).completer = recipe_completer
-
-    destroy_sp = subparsers.add_parser(
-        "destroy",
-        help="destroys a virtual machine described by a recipe"
-    )
-    destroy_sp.add_argument(  # type: ignore
-        "recipe",
-        metavar="<recipe>",
-        help="the virtual machine recipe to destroy"
-    ).completer = recipe_completer
-
     subparsers.add_parser(
         "fix-source-tree-permissions",
         help=line(
@@ -283,8 +253,7 @@ def main(as_module: bool = False) -> None:
         atexit.register(fix_output_nodes_ownerships)
 
         if args.subcommand in ('bootstrap', 'run', 'build', 'image',
-                               'configure', 'bundle', 'sign', 'spawn',
-                               'create', 'destroy'):
+                               'configure', 'bundle'):
             recipe = Recipe(args.recipe)
             subcommand_kwargs: Dict[str, Any] = {}
             if args.subcommand == 'build':
