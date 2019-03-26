@@ -16,11 +16,11 @@ This script is intended to be run via the "repo forall" command, such as:
   $ repo forall [<project>...] -c '${0##*/} [<arg>...]'
 
 Make sure to either use absolute paths for the command to launch or to have
-activated the CLIP OS toolkit environment (see the "source_me.sh" file) to
-expose the CLIP OS toolkit helper scripts in your PATH. This requirement is
-explained by the fact that "repo forall" changes the current working directory
-before invoking the specified command (commands are invoked from within each
-repo project directory).
+activated the CLIP OS toolkit environment (see the "activate" file) to expose
+the CLIP OS toolkit helper scripts in your PATH. This requirement is explained
+by the fact that "repo forall" changes the current working directory before
+invoking the specified command (commands are invoked from within each repo
+project directory).
 
 See "repo help forall" for more details. The above example is not exhaustive.
 EOF

@@ -15,17 +15,30 @@ Building
    You must complete the :ref:`toolkit environment setup <setup>` before
    executing any command from this page.
 
-Activate the toolkit environment
---------------------------------
+Setup and activate the toolkit environment
+------------------------------------------
 
-Create and activate the CLIP OS toolkit environment in which you will be able
+Setup and activate the CLIP OS toolkit environment in which you will be able
 to use all the CLIP OS tools required to build and conveniently manage the
 source tree (such as ``just`` to handle the ``justfile``'s and ``cosmk``):
 
 .. code-block:: shell-session
 
-   $ source toolkit/source_me.sh
-   (toolkit) $
+   $ toolkit/setup.sh    # This is to be run at least once on your machine.
+   $ source toolkit/activate
+   (toolkit) $           # Your shell prompt is automatically prefixed.
+
+.. admonition:: About the CLIP OS toolkit virtualenv setup
+   :class: note
+
+   The purpose of the script ``toolkit/setup.sh`` is to compile and store the
+   CLIP OS toolkit environment under the form of a Python virtualenv in
+   ``run/venv`` directory. You might be invited to run it again if the
+   specification of the toolkit environment has changed over time.
+
+   This setup script can take some time (up to a couple of minutes) to complete
+   on the first launch as it will automatically trigger the compilation of some
+   CPython packages required by the CLIP OS toolkit. Thanks for your patience.
 
 Building the full project
 -------------------------

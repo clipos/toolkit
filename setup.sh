@@ -2,6 +2,15 @@
 # SPDX-License-Identifier: LGPL-2.1-or-later
 # Copyright © 2017 ANSSI. All rights reserved.
 
+# Little foolproof check to avoid messing up the interactive shell of the
+# inattentive user who does a "source toolkit/setup.sh" after a failed call to
+# "source toolkit/activate" that invited him/her to call (but NOT sourced!)
+# this present script before proceeding.
+if [[ "${BASH_SOURCE[0]:-}" != "${0:-}" ]]; then
+    echo >&2 "Warning! This script is not meant to be sourced. Call it normally like any other executable shell script."
+    return 1
+fi
+
 # Safety settings: do not remove!
 set -o errexit -o nounset -o pipefail
 
@@ -23,6 +32,12 @@ if [[ -n "${VIRTUAL_ENV:-}" ]]; then
     exit 1
 fi
 
+# Check if not running as root.
+if [[ "$(id -u)" -eq 0 ]]; then
+    echo >&2 "You should not be running this as root. Aborting."
+    exit 1
+fi
+
 # Explicit check that we have Python 3.6 at least on this system. Otherwise,
 # the use of the option "--prompt" will trigger an error that is absolutely not
 # explicit to indicate that the Python version is too old (since "--prompt" has
@@ -33,10 +48,12 @@ if python3 -c 'import sys; sys.exit(int(sys.version_info >= (3, 6)))'; then
     exit 1
 fi
 
-# This won't strip anything from an eventually previously set up virtualenv in
-# this same directory.
-mkdir -p "${VENV}"
-python3 -m venv --symlinks --prompt "toolkit" "${VENV}"
+# Create the virtualenv if it seems not to have been created succesfully
+# previously:
+if ! [[ -d "${VENV}" && -x "${VENV}/bin/pip" && -f "${VENV}/bin/activate" ]]; then
+    mkdir -p "${VENV}"
+    python3 -m venv --symlinks --prompt "toolkit" "${VENV}"
+fi
 
 # The reason why we use --no-index is to prevent pip from fetching packages (or
 # any package dependency) from PyPI automatically (and without our knowledge).
@@ -96,4 +113,4 @@ cargo install --version "0.3.12" --root "${VENV}" --force just
 unset CARGO_HOME
 unset CARGO_TARGET_DIR
 
-# vim: set ts=4 sts=4 sw=4 et ft=sh:
+# vim: set ts=4 sts=4 sw=4 et ft=sh tw=79:

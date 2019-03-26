@@ -324,7 +324,9 @@ The CLIP OS toolkit.
 
    * ``repo_root.justfile``: The source tree root (symlinked in the source tree
      root) *justfile*.
-   * ``source_me.sh``: The script to source to setup the Python virtualenv.
+   * ``setup.sh``: The script to *call* to setup the Python virtualenv.
+   * ``activate``: The script to *source* to activate the CLIP OS toolkit
+     environment/virtualenv.
 
 ``toolkit/clipostoolkit/``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -356,7 +358,7 @@ source tree or for verifying the OpenPGP signatures of the Git commits).
                 easier access
    :class: tip
 
-   When the CLIP OS toolkit environment is loaded (see the ``source_me.sh``
+   When the CLIP OS toolkit environment is activated (see the ``activate``
    script), the scripts under this directory are exposed in the environment
    ``PATH`` thanks to symbolic links in the CLIP OS toolkit virtualenv.
 
@@ -384,8 +386,8 @@ project and interact easily with the Git repositories.
 .. admonition:: Origin of this file
    :class: tip
 
-   This file is symlinked at the root of the source tree by the toolkit's
-   ``source_me.sh``. It won't show up here until you have ``source``'d that
-   specific file.
+   This file is symlinked at the root of the source tree by the toolkit
+   activation script to source (``toolkit/activate``). It won't show up here
+   until you have ``source``'d that specific file.
 
 .. vim: set tw=79 ts=2 sts=2 sw=2 et:

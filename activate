@@ -58,7 +58,7 @@ __check_current_user_not_root() {
 __check_not_already_in_venv() {
     if [ -n "${VIRTUAL_ENV}" ]; then
         echo >&2 " [!] You seem to already have a virtualenv activated."
-        echo >&2 "     Please \"deactivate\" the current virtualenv to continue."
+        echo >&2 "     Please \"deactivate\" the current virtualenv to be able to activate this one."
         return 1
     fi
 }
@@ -170,31 +170,74 @@ END_OF_BANNER
         echo >&2 # line break
         return 1
     else
-        echo >&2 " [*] Git LFS-backed repositories seem to be properly checked out."
+        echo >&2 " [+] Git LFS-backed repositories seem to be properly checked out."
     fi
 }
 
-__setup_and_activate_venv() {
-    echo >&2 " [*] Setting up a dedicated virtualenv for the CLIP OS toolkit..."
-    echo >&2 "     Please be patient as this may take some time on the first run."
-    "${__path_to_toolkit}/setup_venv.sh" >| "${__path_to_runtime_dir}/virtualenv_setup.log" 2>&1
-    if [ "$?" -eq 0 ]; then
-        . "${__path_to_runtime_dir}/venv/bin/activate" >| "${__path_to_runtime_dir}/virtualenv_activation.log" 2>&1
-        if [ "$?" -eq 0 ]; then
-            echo >&2 " [*] CLIP OS toolkit virtualenv successfully activated for the current shell."
-        else
-            cat >&2 "${__path_to_runtime_dir}/virtualenv_activation.log"
-            echo >&2 # line break
-            echo >&2 " [!] Unknown error: virtualenv activation has failed."
-            echo >&2 "     The log output above is stored in \"run/virtualenv_activation.log\" (from the source tree root level)."
-            return 1
-        fi
-    else
-        cat >&2 "${__path_to_runtime_dir}/virtualenv_setup.log"
-        echo >&2 # line break
-        echo >&2 " [!] Virtualenv setup has failed."
-        echo >&2 "     The log output above is stored in \"run/virtualenv_setup.log\" (from the source tree root level)."
+__activate_and_check_venv() {
+    echo >&2 " [*] Activating the CLIP OS toolkit for the current shell environment..."
+    if [ ! -f "${__path_to_runtime_dir}/venv/bin/activate" ]; then
+        echo >&2 " [!] The CLIP OS toolkit virtual environment seems not setup."
+        echo >&2 "     Setup the toolkit virtual environment by calling the \"setup.sh\" script located at the root of the toolkit directory."
         return 1
+    fi
+    . "${__path_to_runtime_dir}/venv/bin/activate" >/dev/null 2>&1
+    if [ "$?" -ne 0 ]; then
+        echo >&2 # line break
+        echo >&2 " [!] Unexpected error: virtualenv activation has failed."
+        echo >&2 "     Source \"run/venv/bin/activate\" (at the source tree root level) for debugging purposes."
+        return 1
+    fi
+
+    # Checks that the venv is synchronized/up-to-date with the contents of the
+    # "requirements.txt" file we can find in the toolkit repository/directory:
+    if [ -n "${NO_CHECK_VENV:-}" ]; then
+        echo >&2 " [!] CLIP OS toolkit virtual environment check dismissed by request (NO_CHECK_VENV variable set)."
+        return 0
+    fi
+    # Bash-fu disclaimer: The command below checks that all the package
+    # requirements specified in the "requirements.txt" file in toolkit are
+    # satisfied in the virtualenv [1].
+    # This also tolerates any additional Python package that is not present in
+    # the "requirements.txt" but still does not interfere with all the required
+    # packages (i.e. typically additional Python package installed by and for
+    # the developer convenience).
+    # [1]. "pip" is called directly as PATH (which is always an exported
+    #      variable) has been updated with the activate command above,
+    #      therefore we are sure to compare the Python packages of the venv.
+    toolkit="${__path_to_toolkit}" bash -c '[[ -z "$(diff -u99999 <(grep -Ev "^\s*(#.*)?\$" "${toolkit}/requirements.txt") <(pip freeze --all --exclude-editable) | sed "1,3d;/^[^\-]/d" || :)" ]]'
+    if [ "$?" -ne 0 ]; then
+        if ! type deactivate >/dev/null 2>&1; then
+            echo >&2 " [!] Unexpected error: could not find deactivate function from the seemingly bad virtualenv just activated."
+        elif ! deactivate; then
+            echo >&2 " [!] Unexpected error: could not deactivate properly the seemingly bad virtualenv just activated."
+        fi
+        echo >&2 # line break
+        cat >&2 <<END_OF_BANNER
+  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+  @                                                                         @
+  @    Warning! The already existing CLIP OS toolkit virtual environment    @
+  @  does not seem to match the current toolkit environment specifications. @
+  @                                                                         @
+  @ This may lead to undefined problems when using the CLIP OS toolkit as   @
+  @ the tools you may use with this CLIP OS toolkit environment are no more @
+  @ in sync with the contents of the toolkit repository and, to a greater   @
+  @ extent the contents of the whole source tree.                           @
+  @                                                                         @
+  @ Please ensure to properly re-setup the CLIP OS toolkit environment by   @
+  @ re-calling manually the "setup.sh" script located at the root of the    @
+  @ toolkit directory to fix this environment.                              @
+  @                                                                         @
+  @ If you think this is not justified or you perfectly know what you are   @
+  @ doing, you can proceed by setting NO_CHECK_VENV=1 in your environment   @
+  @ to circumvent this check and then reinvoke the source command.          @
+  @                                                                         @
+  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+END_OF_BANNER
+        echo >&2 # line break
+        return 1
+    else
+        echo >&2 " [+] CLIP OS toolkit environment successfully activated (and seems up-to-date)."
     fi
 }
 
@@ -254,17 +297,17 @@ __symlink_repo_root_justfile() {
 }
 
 # Chain the functions and grab the first non-null return code "raised"
-__source_me_return_code__=0
+__activate_return_code__=0
 __check_current_user_not_root \
     && __check_not_already_in_venv \
     && __prepare_toolkit_runtime_dir \
     && __check_shell_umask \
     && __check_lfs_repositories \
-    && __setup_and_activate_venv \
+    && __activate_and_check_venv \
     && __cosmk_bash_completion \
     && __sujust_alias \
     && __symlink_repo_root_justfile \
-        || __source_me_return_code__="$?"
+        || __activate_return_code__="$?"
 
 # Avoid polluting the user's shell environment with our internal stuff:
 unset -v __shell_type \
@@ -277,10 +320,12 @@ unset -f __check_current_user_not_root \
     __prepare_toolkit_runtime_dir \
     __check_shell_umask \
     __check_lfs_repositories \
-    __setup_and_activate_venv \
+    __activate_and_check_venv \
     __cosmk_bash_completion \
     __sujust_alias \
     __symlink_repo_root_justfile
 
 # propagate the return code
-return "${__source_me_return_code__}"
+return "${__activate_return_code__}"
+
+# vim: set ts=4 sts=4 sw=4 et ft=sh tw=79:
