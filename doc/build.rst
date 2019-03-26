@@ -91,6 +91,15 @@ machine with ``libvirt``, use:
    access disabled. See the next paragraph for instructions to create an
    instrumented build.
 
+.. admonition:: TPM support
+   :class: important
+
+   To test the TPM support, you need to install
+   `libtpms <https://github.com/stefanberger/libtpms>`_ and
+   `swtpm <https://github.com/stefanberger/swtpm>`_ using either instructions
+   from the ``INSTALL`` file on their respective GitHub repositories or the AUR
+   packages for Arch Linux users.
+
 Instrumented build for testing
 ------------------------------
 
