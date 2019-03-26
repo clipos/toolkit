@@ -176,6 +176,10 @@ class VirtualizedEnvironment(object):
         with open(workdir_network_xml, "w+") as xmlfile:
             xmlfile.write(xmlnetwork)
 
+        # Do we have a TPM emulator installed? (i.e. is swtpm in $PATH?)
+        is_swtpm_usable = bool(shutil.which('swtpm'))
+        tpm_support_xmlhunk = "<tpm model='tpm-tis'><backend type='emulator' version='2.0'></backend></tpm>"
+
         with open(self.libvirt_domain_xml_template, 'r') as xmlfile:
             xmlcontents = xmlfile.read()
         xmltpl = Template(xmlcontents)
@@ -187,6 +191,7 @@ class VirtualizedEnvironment(object):
             qemu_x86_64_binpath=self.emulator_binpath,
             qcow2_main_disk_image_filepath=workdir_qcow2_image,
             network_name=network_name,
+            tpm_support=(tpm_support_xmlhunk if is_swtpm_usable else ""),
         )
         workdir_domain_xml = os.path.join(working_dir, "domain.xml")
         with open(workdir_domain_xml, "w+") as xmlfile:
