@@ -32,18 +32,30 @@ echo >&2 "Creating a temporary virtualenv to get pip working."
 destroy_tmp_venv
 python3 -m venv --symlinks "${TMP_VENV}"
 
-echo >&2 "Force to have to up-to-date pip in the virtualenv."
-# 2019-03-19: There is currently a bug in Pip 19 that prevent us from using the
-# option "--no-binary :all:" with packages that make us of PEP 517 build system
-# (e.g. flit). Pip raises then a ModuleNotFoundError for "setuptools" and this
-# whole script miserably fails because a package (in our case "flit") cannot be
-# installed in our temporary virtualenv.
-# Therefore the restriction on Pip below. This restriction could be remove once
-# this bug will be fixed (see https://github.com/pypa/pip/issues/6222 ).
-"${TMP_VENV}/bin/pip" install --no-cache --no-binary :all: --upgrade --force-reinstall 'pip<19'
+# With the command above (python3 -m venv ...), we "inherit" by default 3
+# Python packages from the user's Linux distro: setuptools, pip and wheel.
+# (Notice that this is the normal behavior of the venv module in order to
+# provide ways for the user to install new packages in its freshly created
+# venv). However this behavior can cause potential issues that we do not want
+# to hear about (since we do not control the versions of those distro-provided
+# packages). But given the fact that we intentionally provide and vendor
+# **ALL** the packages to be installed in the virtualenv (including pip,
+# setuptools and wheel), we can trick pip into reinstalling them (including
+# itself) with **OUR** packages provided and vendored (and with thoroughly
+# pinned versions).
+"${TMP_VENV}/bin/pip" install --no-cache-dir --no-binary :all: \
+    --upgrade --force-reinstall setuptools pip wheel
 
+# [2019-04-02] Note/Hack: There is currently a bug in Pip 19 that prevent us
+# from using the option "--no-binary :all:" with packages that make use of PEP
+# 517 build system (e.g. flit), hence the "--no-use-pep517" flag below that
+# will prevent Pip from trying to install such packages.
+# This package restriction could be removed once the bug in Pip will be fixed,
+# follow GitHub issue: https://github.com/pypa/pip/issues/6222
 echo >&2 "Install the CLIP OS toolkit in that temporary virtualenv."
-"${TMP_VENV}/bin/pip" install --no-cache --no-binary :all: --editable "${TOOLKIT}/.[qa,docs]"
+"${TMP_VENV}/bin/pip" install --no-cache-dir --no-binary :all: \
+    --no-use-pep517 \
+    --editable "${TOOLKIT}/.[qa,docs]"
 
 echo >&2 "Generate the new \"requirements.txt\" by freezing the package list."
 cat > "${TOOLKIT}/requirements.txt" <<END

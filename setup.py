@@ -63,7 +63,10 @@ setup(
         "qa": [
             "mypy",
             "pylint",
-            "radon",
+
+            # Temporarily disabled because of the PEP 517 bug in Pip (radon has
+            # transitive dependencies that only make use of PEP 517 packaging):
+            #"radon",
         ],
         # Documentation building related packages
         "docs": [
