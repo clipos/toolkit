@@ -177,8 +177,41 @@ class VirtualizedEnvironment(object):
             xmlfile.write(xmlnetwork)
 
         # Do we have a TPM emulator installed? (i.e. is swtpm in $PATH?)
-        is_swtpm_usable = bool(shutil.which('swtpm'))
+        is_swtpm_present = bool(shutil.which('swtpm'))
         tpm_support_xmlhunk = "<tpm model='tpm-tis'><backend type='emulator' version='2.0'></backend></tpm>"
+
+        # We require libvirt >= 4.5.0 to get swtpm working, check the current
+        # libvirt version:
+        _int_libvirt_version = libvirt.getVersion()
+        # According to libvirt docs, getVersion() returns the libvirt version
+        # as an integer x where x = 1000000*major + 1000*minor + release.
+        # Compare versions with a more Pythonic way (tuples):
+        libvirt_version = (
+            (_int_libvirt_version // 1000000),        # major
+            ((_int_libvirt_version // 1000) % 1000),  # minor
+            (_int_libvirt_version % 1000),            # release
+        )
+        libvirt_version_supports_swtpm = bool(libvirt_version >= (4, 5, 0))
+        is_swtpm_usable = is_swtpm_present and libvirt_version_supports_swtpm
+
+        if not is_swtpm_usable:
+            if not is_swtpm_present:
+                log.warn(line(
+                    """swtpm (libtpms-based TPM emulator) could not be found in
+                    PATH but is required by libvirt for the TPM emulation."""
+                ))
+            if not libvirt_version_supports_swtpm:
+                log.warn(line(
+                    """Your libvirt version is too old to support swtpm
+                    (libtpms-based TPM emulator): libvirt 4.5.0 at least is
+                    required but your libvirt version is currently
+                    {libvirt_version}."""
+                ).format(
+                    libvirt_version=".".join([str(i) for i in libvirt_version]),
+                ))
+            log.warn(line(
+                """TPM cannot be emulated: falling back to launch a libvirt
+                virtual machine without any emulated TPM."""))
 
         with open(self.libvirt_domain_xml_template, 'r') as xmlfile:
             xmlcontents = xmlfile.read()
