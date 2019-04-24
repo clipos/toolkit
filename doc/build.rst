@@ -40,6 +40,28 @@ source tree (such as ``just`` to handle the ``justfile``'s and ``cosmk``):
    on the first launch as it will automatically trigger the compilation of some
    CPython packages required by the CLIP OS toolkit. Thanks for your patience.
 
+Instrumentation features for testing
+------------------------------------
+
+Default builds of the project are meant to be set up with a production-ready
+configuration. There is currently no password-based local login available in
+this configuration. Thus if you want to test the project in QEMU, you will have
+to enable some :ref:`instrumentation features <development>`. A good default
+set of instrumentation features is provided in the
+``toolkit/instrumentation.toml.example`` example file which can be used as is
+by copying it to the source tree root folder:
+
+.. code-block:: shell-session
+
+   (toolkit) $ cp toolkit/instrumentation.toml.example instrumentation.toml
+
+The default configuration will keep most system configuration unchanged and
+will give you local password-less `root` access.
+
+.. note::
+
+   Any change of instrumentation features requires a full project rebuild.
+
 Building the full project
 -------------------------
 
@@ -90,6 +112,21 @@ To run all steps required to build CLIP OS:
 Building a QEMU image and running using QEMU/KVM
 ------------------------------------------------
 
+.. admonition:: TPM emulation support
+   :class: important
+
+   TPM emulation support is required to test the project under QEMU. To enable
+   it, you may install
+   `libtpms <https://github.com/stefanberger/libtpms>`_ and
+   `swtpm <https://github.com/stefanberger/swtpm>`_ using either instructions
+   from the ``INSTALL`` file on their respective GitHub repositories or the AUR
+   packages for Arch Linux users.
+
+   Alternatively, you may enable the ``initramfs-no-require-tpm``
+   instrumentation feature which will allow the initramfs to ask for a
+   passphrase at bootup if TPM support is not available. The default passphrase
+   is ``core_state_key``.
+
 To build a QCOW2 QEMU disk image and to setup a EFI & QEMU/KVM enabled virtual
 machine with ``libvirt``, use:
 
@@ -101,36 +138,7 @@ machine with ``libvirt``, use:
    :class: important
 
    The default build configuration will create production images with root
-   access disabled. See the next paragraph for instructions to create an
-   instrumented build.
-
-.. admonition:: TPM support
-   :class: important
-
-   To test the TPM support, you need to install
-   `libtpms <https://github.com/stefanberger/libtpms>`_ and
-   `swtpm <https://github.com/stefanberger/swtpm>`_ using either instructions
-   from the ``INSTALL`` file on their respective GitHub repositories or the AUR
-   packages for Arch Linux users.
-
-Instrumented build for testing
-------------------------------
-
-In order to test the QEMU images, you have to select the instrumentation level
-you want by copying the ``toolkit/instrumentation.toml.example`` example in the
-source tree root folder:
-
-.. code-block:: shell-session
-
-   (toolkit) $ cp toolkit/instrumentation.toml.example instrumentation.toml
-
-The default instrumented configuration will enable you to log in as root
-without password. You will have to rebuild the project and the QEMU image to
-apply the change:
-
-.. code-block:: shell-session
-
-   (toolkit) $ sujust all
-   (toolkit) $ sujust qemu
+   access disabled. See the `Instrumentation features for testing`_ paragraph
+   for instructions to create an instrumented build.
 
 .. vim: set tw=79 ts=2 sts=2 sw=2 et:
