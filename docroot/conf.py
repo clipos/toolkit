@@ -89,9 +89,9 @@ pygments_style = 'sphinx'
 suppress_warnings = [
         'ref.python'
 ]
-autodoc_default_flags = [
-        'ignore-module-all'
-]
+autodoc_default_options = {
+        'ignore-module-all': True
+}
 
 # Enumerate figures
 numfig = True
