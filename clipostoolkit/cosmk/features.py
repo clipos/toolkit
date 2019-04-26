@@ -16,7 +16,7 @@ import schema
 
 from . import recipe  # for typing annotations
 from .commons import (ENVVAR_FORMAT_RE, RECIPE_IDENTIFIER_RE, is_tty_attached,
-                      line)
+                      line, run)
 from .exceptions import CosmkError, RecipeActionError
 from .log import critical, debug, error, info, warn
 from .privileges import ElevatedPrivileges
@@ -262,9 +262,19 @@ class RecipeConfigureFeature(RecipeFeature):
                 proper recipe ({!r}) into the working environment for the
                 configure action step...""".format(
                     recipe_to_configure.identifier)))
-            shutil.copytree(os.path.join(image_out_path, "root"),
-                            os.path.join(action_out_path, "root"),
-                            symlinks=True)
+            # WARNING!! Do not use `shutil.copytree()` function for the action
+            # that follows as this function uses `shutil.copy2()` by default,
+            # which itself uses `shutil.copystat()`. However, `copystat()`
+            # copies all node metadata **EXCEPT** the user and mode
+            # ownerships!!! See the Warning block on top of the page
+            # https://docs.python.org/3/library/shutil.html.
+            # Therefore, let's use the good old "cp -a", which seems to be
+            # available for all flavors of "cp" (but GNU cp is advised for
+            # this) and seems way quicker than `copytree()`. A pure Python
+            # workaround would have been too time-consuming.
+            run(["cp", "-a",
+                 os.path.join(image_out_path, "root"),
+                 os.path.join(action_out_path, "root")])
 
         with sdk.session(
                 action_name="configure",
