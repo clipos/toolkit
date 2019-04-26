@@ -108,7 +108,7 @@ class RecipeRootFeature(RecipeFeature):
 
         # Clear out the previous image result when told so:
         if os.path.exists(action_out_path) and clear_previous_build:
-            debug("clearing {!r}...".format(action_out_path))
+            info("Clearing {!r}...".format(action_out_path))
             with ElevatedPrivileges():
                 shutil.rmtree(action_out_path)
 
@@ -120,7 +120,7 @@ class RecipeRootFeature(RecipeFeature):
         terminal = is_tty_attached()
 
         if clear_cache:
-            debug("clearing cache for recipe {!r}...".format(
+            info("Clearing cache for recipe {!r}...".format(
                 self.recipe.identifier))
             with ElevatedPrivileges():
                 shutil.rmtree(os.path.join(repo_root_path(),
@@ -153,7 +153,7 @@ class RecipeRootFeature(RecipeFeature):
 
         # Always clear out the previous image result:
         if os.path.exists(action_out_path):
-            debug("clearing {!r}...".format(action_out_path))
+            info("Clearing {!r}...".format(action_out_path))
             with ElevatedPrivileges():
                 shutil.rmtree(action_out_path)
 
@@ -244,7 +244,7 @@ class RecipeConfigureFeature(RecipeFeature):
 
         # Always clear out the previous configure result:
         if os.path.exists(action_out_path):
-            debug("clearing {!r}...".format(action_out_path))
+            info("Clearing {!r}...".format(action_out_path))
             with ElevatedPrivileges():
                 shutil.rmtree(action_out_path)
 
@@ -257,8 +257,8 @@ class RecipeConfigureFeature(RecipeFeature):
         # Retrieve the result of the image action to work on it for this
         # configuration step:
         with ElevatedPrivileges():
-            debug(line(
-                """copying resulting root of the image action step for the
+            info(line(
+                """Copying resulting root of the image action step for the
                 proper recipe ({!r}) into the working environment for the
                 configure action step...""".format(
                     recipe_to_configure.identifier)))
@@ -323,7 +323,7 @@ class RecipeBundleFeature(RecipeFeature):
 
         # Always clear out the previous image result:
         if os.path.exists(action_out_path):
-            debug("clearing {!r}...".format(action_out_path))
+            info("Clearing {!r}...".format(action_out_path))
             with ElevatedPrivileges():
                 shutil.rmtree(action_out_path)
 

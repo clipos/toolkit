@@ -87,24 +87,24 @@ class _FancyConsoleFormatter(logging.Formatter):
 
     prefixes = {
         logging.DEBUG: {
-            False: " [.] ",
-            True: " \x1b[32;1m[.]\x1b[0m ",
+            False: " [-] ",
+            True: " \x1b[32;1m[-]\x1b[0m ",
         },
         logging.INFO: {
-            False: " [-] ",
-            True: " \x1b[34;1m[-]\x1b[0m ",
+            False: " [*] ",
+            True: " \x1b[34;1m[*]\x1b[0m ",
         },
         logging.WARNING: {
-            False: " [*] ",
-            True: " \x1b[33;1m[*]\x1b[0m ",
+            False: " [!] ",
+            True: " \x1b[33;1m[!]\x1b[0m ",
         },
         logging.ERROR: {
-            False: " [!] ",
-            True: " \x1b[31;1m[!]\x1b[0m ",
-        },
-        logging.CRITICAL: {
             False: " [X] ",
             True: " \x1b[31;1m[X]\x1b[0m ",
+        },
+        logging.CRITICAL: {
+            False: " [#] ",
+            True: " \x1b[31;1m[#]\x1b[0m ",
         },
     }
 
@@ -128,6 +128,10 @@ class _FancyConsoleFormatter(logging.Formatter):
             prefix_len = len(
                 re.sub("\x1b"r"\[([0-9]{1,2}(;[0-9]{1,2})*)?[m|K]",
                        "", prefix))
+            # Set everything in bold to differtiate visually what's coming from
+            # cosmk or the SDKs scripts and the output of the commands launched
+            # within SDKs:
+            msg = "\x1b[1m" + msg.replace("\n", "\x1b[0m\n\x1b[1m") + "\x1b[0m"
             # and align with indentation created by prefix
             msg = msg.replace("\n", "\n" + " "*prefix_len)
 
