@@ -13,7 +13,7 @@ import toml
 
 from .commons import PRODUCT_NAME_RE, line
 from .exceptions import ProductPropertiesError
-from .instrumentation import instrumented_recipes
+from .instrumentation import Instrumentation
 from .log import critical, debug, error, info, warn
 from .sourcetree import repo_root_path
 
@@ -57,16 +57,16 @@ class Product(object):
 
     @property
     def version(self) -> str:
-        """Returns the version of this product as defined in its "properties.toml"
-        file."""
+        """Returns the version of this product as defined in its
+        "properties.toml" file."""
         return self.properties["version"]
 
     @property
     def tainted_version(self) -> str:
-        """Returns the version of this product as defined in its "properties.toml"
-        file but "tainted" with a build flag ``instrumentation`` if an
-        "instrumentation.toml" file is present at the root of the repo source
-        tree."""
+        """Returns the version of this product as defined in its
+        "properties.toml" file but "tainted" with a build flag
+        ``instrumentation`` if at least one instrumentation feature is
+        enabled."""
 
         version = semver.parse(self.version)
         def taint_version(tag: str) -> None:
@@ -75,10 +75,8 @@ class Product(object):
             else:
                 version["build"] = tag
 
-        # Yes, even if the instrumentation does not affect any recipe composing
-        # the product, that product version will still be tainted as
-        # "instrumented".
-        if instrumented_recipes():
+        instru = Instrumentation()
+        if instru.features:
             taint_version("instrumented")
 
         return str(semver.VersionInfo(**version))

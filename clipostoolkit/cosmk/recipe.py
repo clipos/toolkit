@@ -15,7 +15,6 @@ from . import features  # for typing annotations and RecipeFeature subclasses
 from .commons import (ENVVAR_FORMAT_RE, RECIPE_IDENTIFIER_RE, RECIPE_NAME_RE,
                       line)
 from .exceptions import RecipeConfigurationError
-from .instrumentation import InstrumentationLevel, instrumented_recipes
 from .log import critical, debug, error, info, warn
 from .product import Product
 from .sourcetree import repo_root_path
@@ -63,12 +62,6 @@ class Recipe(object):
             raise RecipeConfigurationError(
                 "Cannot parse or open \"recipe.toml\" configuration file.")
         self.config = self.validate_metaconfig(config)
-
-        # Recipe instrumentation level with fallback to production if not
-        # defined:
-        self.instrumentation_level: InstrumentationLevel = (
-            instrumented_recipes().get(self.identifier,
-                                       InstrumentationLevel.PRODUCTION))
 
         # initialize features for this recipe:
         self.features: Dict[str, 'features.RecipeFeature'] = {}

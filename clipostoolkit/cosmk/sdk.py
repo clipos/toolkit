@@ -21,6 +21,7 @@ from .container import (Container, ContainerDeviceBinding, ContainerMountpoint,
 from .exceptions import (CosmkError, SdkBootstrapError, SdkError,
                          SdkNotFoundError)
 from .fs import mksquashfs
+from .instrumentation import Instrumentation
 from .log import critical, debug, error, info, warn
 from .privileges import ElevatedPrivileges
 from .sourcetree import repo_root_path
@@ -267,8 +268,6 @@ class Sdk(object):
                 "CURRENT_PRODUCT_TAINTED_VERSION":
                     self.recipe.product.tainted_version,
                 "CURRENT_RECIPE": self.recipe.name,
-                "CURRENT_RECIPE_INSTRUMENTATION_LEVEL":
-                    self.recipe.instrumentation_level.value,
                 "CURRENT_ACTION": "bootstrap",
                 "CURRENT_SDK_PRODUCT": self.recipe.product.name,
                 "CURRENT_SDK_RECIPE": self.recipe.name,
@@ -372,6 +371,13 @@ class Sdk(object):
             raise SdkNotFoundError("could not found rootfs squashfs image "
                                    "file for this SDK")
 
+        # Serialize the instrumentation feature in a string to be passed as an
+        # environment variable:
+        instrumentation = Instrumentation()
+        serialized_instru_features = ''
+        if instrumentation.features:
+            serialized_instru_features = " ".join(instrumentation.features)
+
         sdk_container = Container(
             name="{sdkproduct}-{sdk}.{action}.{product}-{recipe}".format(
                 sdkproduct=self.recipe.product.name,
@@ -406,8 +412,7 @@ class Sdk(object):
             "CURRENT_PRODUCT_TAINTED_VERSION":
                 action_targeted_recipe.product.tainted_version,
             "CURRENT_RECIPE": action_targeted_recipe.name,
-            "CURRENT_RECIPE_INSTRUMENTATION_LEVEL":
-                action_targeted_recipe.instrumentation_level.value,
+            "CURRENT_INSTRUMENTATION_FEATURES": serialized_instru_features,
             "CURRENT_ACTION": action_name,
             "CURRENT_SDK_PRODUCT": self.recipe.product.name,
             "CURRENT_SDK_RECIPE": self.recipe.name,
