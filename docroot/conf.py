@@ -198,8 +198,12 @@ texinfo_documents = [
 
 # -- Options for intersphinx extension ---------------------------------------
 
-# Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'https://docs.python.org/3/': None}
+# Explicitly set intersphinx_mapping to a local path to avoid fetching it
+# dynamically from the network for each build and offline support (See
+# https://github.com/sphinx-doc/sphinx/issues/4765).
+# Must be manually updated (probably for each major python version) with:
+# $ curl https://docs.python.org/3/objects.inv > toolkit/docroot/objects.inv
+intersphinx_mapping = {'https://docs.python.org/3/': 'objects.inv'}
 
 # -- Options for todo extension ----------------------------------------------
 
