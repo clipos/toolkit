@@ -117,6 +117,5 @@ class ContainerSnapshotError(CosmkError):
 
 class VirtualizedEnvironmentError(CosmkError):
     """Exception raised when an operation on a virtualized environment (*e.g.*
-    a `libvirt` "domain", a network configuration made by `libvirt`, *etc.*)
-    cannot be pursued or has failed."""
+    a `libvirt` "domain") cannot be pursued or has failed."""
     pass

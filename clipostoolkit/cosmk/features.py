@@ -448,7 +448,6 @@ class RecipeVirtualizedEnvironmentFeature(RecipeFeature):
     SCHEMA = schema.Schema({
         "virt": {
             "xml_domain_template": schema.And(str, len),
-            "xml_network_template": schema.And(str, len),
             "ovmf_code": schema.And(str, len),
             "ovmf_vars_template": schema.And(str, len),
             "qcow2_main_disk_image": schema.And(str, len),
@@ -468,9 +467,6 @@ class RecipeVirtualizedEnvironmentFeature(RecipeFeature):
             name=name,
             libvirt_domain_xml_template=self.replace_placeholders(
                 self.recipe.config["virt"]["xml_domain_template"],
-                sdk_context=False),
-            libvirt_network_xml_template=self.replace_placeholders(
-                self.recipe.config["virt"]["xml_network_template"],
                 sdk_context=False),
             qcow2_main_disk_image=self.replace_placeholders(
                 self.recipe.config["virt"]["qcow2_main_disk_image"],
@@ -495,8 +491,7 @@ class RecipeVirtualizedEnvironmentFeature(RecipeFeature):
         try:
             info("Interrupt the virtual machine with Control+C (SIGINT).\n" +
                  line("""Note: this will kill the virtual machine and cleanup
-                      the libvirt domain and its associated virtual
-                      network."""))
+                      the libvirt domain."""))
             signal.pause()
         except KeyboardInterrupt:
             virtenv.destroy()
