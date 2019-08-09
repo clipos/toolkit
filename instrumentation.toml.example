@@ -111,6 +111,10 @@ features = [
     #
     # Requires: "debuggable-kernel"
     #"coredump-handler",
+
+    # Build a second Core image & EFI binary with an greater version to test
+    # the update process. Also adds hosts entry for the test environment.
+    #"test-update",
 ]
 
 # vim: set ts=4 sts=4 sw=4 et ft=toml:
