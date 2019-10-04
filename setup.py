@@ -68,12 +68,6 @@ setup(
             # transitive dependencies that only make use of PEP 517 packaging):
             #"radon",
         ],
-        # Documentation building related packages
-        "docs": [
-            "sphinx",
-            "sphinx-rtd-theme",
-            "sphinx-autodoc-typehints",
-        ],
     },
     entry_points={
         "console_scripts": [
