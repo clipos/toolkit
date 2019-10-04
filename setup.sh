@@ -122,13 +122,15 @@ for item in "${TOOLKIT}/helpers/"*; do
 done
 unset item
 
-# Build and install just
-CARGO_HOME="${REPOROOT}/run/cargo"
-CARGO_TARGET_DIR="${REPOROOT}/run/cargo/target"
+# Do not install just if the system provides it and we ask not to install it
+if [[ ( -z "$(command -v just)" ) || ( -z "${CLIPOS_USE_SYSTEM_JUST+x}" ) ]]; then
+    # Build and install just
+    CARGO_HOME="${REPOROOT}/run/cargo"
+    CARGO_TARGET_DIR="${REPOROOT}/run/cargo/target"
 
-mkdir -p "${CARGO_HOME}" "${CARGO_TARGET_DIR}"
+    mkdir -p "${CARGO_HOME}" "${CARGO_TARGET_DIR}"
 
-cat > "${CARGO_HOME}/config" <<EOF
+    cat > "${CARGO_HOME}/config" <<EOF
 [source.crates-io]
 replace-with = "assets_crates-io"
 
@@ -136,12 +138,13 @@ replace-with = "assets_crates-io"
 local-registry = "${REPOROOT}/assets/crates-io"
 EOF
 
-export CARGO_HOME
-export CARGO_TARGET_DIR
+    export CARGO_HOME
+    export CARGO_TARGET_DIR
 
-cargo install --version "0.3.12" --root "${VENV}" --force just
+    cargo install --version "0.3.12" --root "${VENV}" --force just
 
-unset CARGO_HOME
-unset CARGO_TARGET_DIR
+    unset CARGO_HOME
+    unset CARGO_TARGET_DIR
+fi
 
 # vim: set ts=4 sts=4 sw=4 et ft=sh tw=79:
