@@ -44,11 +44,11 @@ clean-all: clean clean-cache clean-run
 
 # Build the documentation
 doc:
-  cd docs-src && ./build.sh
+    cd docs-src && ./build.sh
 
 # Open the documentation in the default browser
 open-doc:
-  xdg-open docs-src/_build/index.html
+    xdg-open docs-src/_build/index.html
 
 # Retrieve binary packages & SDK from the CI
 get-cache:
