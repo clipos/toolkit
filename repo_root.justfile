@@ -53,8 +53,19 @@ open-doc:
 # Retrieve binary packages & SDK from the CI
 get-cache:
     #!/usr/bin/env bash
-    echo "This will be updated once the build infrastructure is in place."
-    exit 0
+    # Basic sanity check to avoid mistakes
+    if [[ -d 'cache' ]]; then
+        >&2 echo "[*] Remove the 'cache' folder before proceeding:"
+        >&2 echo "    $ just clean-cache"
+        exit 1
+    fi
+    # GitLab.com project ID for CLIPOS/ci
+    project_id='14752889'
+    # GitLab.com API URL to get the latest successful build
+    url="https://gitlab.com/api/v4/projects/${project_id}/pipelines/latest"
+    # Pick the latest successful build
+    build="$(curl --proto '=https' --tlsv1.2 -sSf ${url} | jq '.id')"
+    ./toolkit/helpers/get-cache-from-ci.sh "https://files.clip-os.org/${build}"
 
 # Helper command for 'repo forall -c <cmd>' output
 rfa +cmd:
