@@ -45,7 +45,15 @@ main() {
     done
 
     # Retrieve the SHA256SUMS file and check artifacts integrity
-    curl --proto '=https' --tlsv1.2 -sSf -o 'SHA256SUMS' "${url}/SHA256SUMS"
+    curl --proto '=https' --tlsv1.2 -sSf -o 'SHA256SUMS.full' "${url}/SHA256SUMS"
+
+    # Only keep relevant checksums to avoid issues
+    > 'SHA256SUMS'
+    for a in "${artifacts[@]}"; do
+        grep "${a}" 'SHA256SUMS.full' >> 'SHA256SUMS'
+    done
+    rm 'SHA256SUMS.full'
+
     echo "[*] Verifying artifacts integrity..."
     sha256sum -c --ignore-missing 'SHA256SUMS'
 
