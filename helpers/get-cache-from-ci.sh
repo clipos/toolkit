@@ -22,6 +22,11 @@ main() {
     local -r url="${1}"
     echo "[*] Retrieving artifacts from: ${url}"
 
+    if [[ -z "${CLIPOS_KEEP_ARTIFACTS+x}" ]]; then
+        >&2 echo "[!] Downloaded artifacts archives will be removed once extracted."
+        >&2 echo "    To keep them, set the CLIPOS_KEEP_ARTIFACTS environment variable."
+    fi
+
     # Make sure that we are at the repo root
     cd "${REPOROOT}"
 
@@ -50,8 +55,15 @@ main() {
         tar --extract --file "${a}" --warning=no-unknown-keyword
     done
 
-    echo "[*] You may now remove all downloaded artifacts with:"
-    echo "    $ rm ./sdk*.tar.zst ./*_pkgs.tar.zst"
+    if [[ -z "${CLIPOS_KEEP_ARTIFACTS+x}" ]]; then
+        for a in "${artifacts[@]}"; do
+            echo "[*] Removing ${a}..."
+            rm ${a}
+        done
+    else
+        echo "[*] You may now remove all downloaded artifacts with:"
+        echo "    $ rm ${artifacts[@]} SHA256SUMS"
+    fi
 
     echo "[*] Success!"
 }
