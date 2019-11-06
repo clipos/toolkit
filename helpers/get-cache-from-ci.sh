@@ -55,7 +55,7 @@ main() {
     rm 'SHA256SUMS.full'
 
     echo "[*] Verifying artifacts integrity..."
-    sha256sum -c --ignore-missing 'SHA256SUMS'
+    sha256sum -c 'SHA256SUMS'
 
     # Extract artifacts
     for a in "${artifacts[@]}"; do
@@ -68,6 +68,8 @@ main() {
             echo "[*] Removing ${a}..."
             rm ${a}
         done
+        echo "[*] Removing SHA256SUMS..."
+        rm SHA256SUMS
     else
         echo "[*] You may now remove all downloaded artifacts with:"
         echo "    $ rm ${artifacts[@]} SHA256SUMS"
