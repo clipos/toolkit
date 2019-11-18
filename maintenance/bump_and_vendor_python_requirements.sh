@@ -55,7 +55,7 @@ python3 -m venv --symlinks "${TMP_VENV}"
 echo >&2 "Install the CLIP OS toolkit in that temporary virtualenv."
 "${TMP_VENV}/bin/pip" install --no-cache-dir --no-binary :all: \
     --no-use-pep517 \
-    --editable "${TOOLKIT}/.[qa,docs]"
+    --editable "${TOOLKIT}/.[qa]"
 
 echo >&2 "Generate the new \"requirements.txt\" by freezing the package list."
 cat > "${TOOLKIT}/requirements.txt" <<END
