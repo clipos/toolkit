@@ -51,6 +51,7 @@ fi
 # Create the virtualenv if it seems not to have been created succesfully
 # previously:
 if ! [[ -d "${VENV}" && -x "${VENV}/bin/pip" && -f "${VENV}/bin/activate" ]]; then
+    echo "[*] Creating virtual env..."
     mkdir -p "${VENV}"
     python3 -m venv --symlinks --prompt "toolkit" "${VENV}"
 fi
@@ -75,6 +76,7 @@ fi
 # enable us to take action. With those options below, pip only consider the
 # packages provided/vendored in $VENDOR, i.e. assets/toolkit (ensure to only
 # gather sources packages in this directory).
+echo "[*] Installing: setuptools pip wheel..."
 "${VENV}/bin/pip" install \
     --no-index --find-links "file://${VENDOR}" \
     --no-cache-dir --no-binary :all: \
@@ -88,6 +90,7 @@ fi
 # will prevent Pip from trying to install such packages.
 # This package restriction could be removed once the bug in Pip will be fixed,
 # follow GitHub issue: https://github.com/pypa/pip/issues/6222
+echo "[*] Installing: requirements.txt..."
 "${VENV}/bin/pip" install \
     --no-index --find-links "file://${VENDOR}" \
     --no-cache-dir --no-binary :all: \
@@ -103,6 +106,7 @@ fi
 # "--no-deps" flag) for clipostoolkit package as we check them further down and
 # we deliberatly trust the "requirements.txt" to include explicitly all the
 # dependencies for clipostoolkit package.
+echo "[*] Installing: toolkit..."
 "${VENV}/bin/pip" install \
     --no-deps --no-index \
     --no-cache-dir --no-binary :all: \
@@ -112,6 +116,7 @@ fi
 # the "bin" directory of the virtualenv in order to make them appear via PATH.
 # This eases the ability to call those scripts for the user (espcially for the
 # scripts intended to be used with "repo forall" as repo changes the CWD).
+echo "[*] Installing: helpers..."
 for item in "${TOOLKIT}/helpers/"*; do
     if [[ -x "${item}" ]]; then
         # Assuming GNU coreutils for the "--relative-to" option of realpath:
@@ -124,6 +129,7 @@ unset item
 
 # Do not install just if the system provides it and we ask not to install it
 if [[ ( -z "$(command -v just)" ) || ( -z "${CLIPOS_USE_SYSTEM_JUST+x}" ) ]]; then
+    echo "[*] Installing: just..."
     # Build and install just
     CARGO_HOME="${REPOROOT}/run/cargo"
     CARGO_TARGET_DIR="${REPOROOT}/run/cargo/target"
