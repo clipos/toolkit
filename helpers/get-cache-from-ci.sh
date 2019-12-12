@@ -40,7 +40,6 @@ main() {
     # List of artifacts to retrieve (SDKs, Core & EFIboot packages)
     artifacts=(
         'sdk.tar.zst'
-        'sdk_debian.tar.zst'
         'core_pkgs.tar.zst'
         'efiboot_pkgs.tar.zst'
     )

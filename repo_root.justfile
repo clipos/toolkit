@@ -2,13 +2,7 @@
 # Copyright © 2017 ANSSI. All rights reserved.
 
 # Default recipes: iterative build reusing cached packages
-all: clipos
-
-# Build clipos then create QEMU image & run resulting image
-all-run: clipos qemu
-
-# Clean output folder and build everything in order. Use cached packages
-clipos:
+all:
     just products/clipos/all
 
 # Shortcut for development builds that do not change any packages
@@ -21,11 +15,12 @@ cbq:
 
 # Build and run the QEMU image for testing
 qemu:
-    just products/clipos/qemu
+    ./testbed/create_qemu_image.sh
+    just run
 
-# Run the QEMU image for testing
+# Run the QEMU image for testing in the virtual testbed environment
 run:
-    just products/clipos/qemu/run
+    ./testbed/run_with_libvirt.py
 
 # Clean all temporary output folders
 clean:
