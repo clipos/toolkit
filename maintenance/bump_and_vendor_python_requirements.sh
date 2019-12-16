@@ -5,6 +5,12 @@
 # Safety settings: do not remove!
 set -o errexit -o nounset -o pipefail
 
+# Do not run as root
+if [[ "${EUID}" == 0 ]]; then
+    >&2 echo "[*] Do not run as root!"
+    exit 1
+fi
+
 # Get the basename of this program and the directory path to itself:
 readonly PROGNAME="${BASH_SOURCE[0]##*/}"
 readonly PROGPATH="$(realpath "${BASH_SOURCE[0]%/*}")"

@@ -4,6 +4,12 @@
 
 set -e -u -o pipefail
 
+# Do not run as root
+if [[ "${EUID}" == 0 ]]; then
+    >&2 echo "[*] Do not run as root!"
+    exit 1
+fi
+
 readonly default="\e[0m"
 readonly light_red="\e[91m"
 readonly light_green="\e[92m"

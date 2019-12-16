@@ -2,7 +2,14 @@
 # SPDX-License-Identifier: LGPL-2.1-or-later
 # Copyright © 2019 ANSSI. All rights reserved.
 
-set -e -u -o pipefail
+# Safety settings: do not remove!
+set -o errexit -o nounset -o pipefail
+
+# Do not run as root
+if [[ "${EUID}" == 0 ]]; then
+    >&2 echo "[*] Do not run as root!"
+    exit 1
+fi
 
 # Get build artifacts from CLIP OS CI
 
