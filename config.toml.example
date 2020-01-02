@@ -1,0 +1,59 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+# Copyright © 2019 ANSSI. All rights reserved.
+
+[product]
+# Select which product to build (i.e. the collection of
+# recipes to use in the 'products' folder)
+name = "clipos"
+
+# Select which (if any) CI infrastructure to pull binaries from. Use empty
+# strings to ignore all CI integration.
+[ci]
+# Base URL for the GitLab instance to use
+url = "https://gitlab.com"
+# Container registry used to pull SDK images
+registry = "registry.gitlab.com/clipos/ci"
+# GitLab.com project ID for CLIPOS/ci. Can be retrieved with:
+# $ URL="https://gitlab.com/api/v4/projects"
+# $ NAME="$(echo -n 'CLIPOS/ci' | sed 's|/|%2F|g')"
+# $ curl "${URL}/${NAME}" | jq '.id'
+project_id = "14752889"
+# Base URL to retrieve artifacts (binary packages) from
+artifacts = "https://files.clip-os.org"
+
+[development]
+# Enable network access during development for 'bootstrap' and 'build' actions
+network = "yes"
+# By default, the project creates images intended for production use. To ease
+# development and debug, you can enable instrumentation features that alter the
+# behavior of all project actions launched with the cosmk tool.
+
+# Notice: If at least one instrumentation feature is enabled in this file, then
+# the product version will be tainted with an "instrumented" tag as a SemVer
+# build metadata (e.g. "X.Y.Z+instrumented").
+#
+# For an in-depth reference of the effects of all instrumentation features
+# proposed below, please refer to the appropriate page of the CLIP OS product
+# documentation:
+# <https://docs.clip-os.org/clipos/development.html#effect-of-instrumentation-levels>
+# The other products (i.e. CLIP OS derivatives) may implement or enhance those
+# product instrumentation features.
+instrumentation = [
+    #"instrumented-core",
+    #"passwordless-root-login",
+    #"allow-ssh-root-login",
+    #"dev-friendly-bootloader",
+    #"instrumented-initramfs",
+    #"soften-kernel-configuration",
+    #"initramfs-no-require-tpm",
+    #"initramfs-no-tpm-lockout",
+    #"debuggable-initramfs",
+    #"breakpointed-initramfs",
+    #"early-root-shell",
+    #"debuggable-kernel",
+    #"verbose-systemd",
+    #"coredump-handler",
+    #"test-update",
+]
+
+# vim: set ts=4 sts=4 sw=4 et ft=toml:
