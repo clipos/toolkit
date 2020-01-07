@@ -14,143 +14,70 @@ fi
 # Safety settings: do not remove!
 set -o errexit -o nounset -o pipefail
 
-# Get the basename of this program and the directory path to itself:
+# Get the basename of this program and the directory path to itself
 readonly PROGNAME="${BASH_SOURCE[0]##*/}"
 readonly PROGPATH="$(realpath "${BASH_SOURCE[0]%/*}")"
 
-# Full path to the venv and the vendor dirs:
-readonly TOOLKIT="$(realpath "${PROGPATH}")"
-readonly REPOROOT="$(realpath "${TOOLKIT}/..")"
-readonly VENV="${REPOROOT}/run/venv"
-readonly VENDOR="${REPOROOT}/assets/toolkit"
-readonly REQUIREMENTS_TXT="${TOOLKIT}/requirements.txt"
-
-# Check if not already in a virtualenv.
-if [[ -n "${VIRTUAL_ENV:-}" ]]; then
-    echo >&2 "Already in a virtualenv (\"${VIRTUAL_ENV:-}\"). Aborting."
-    echo >&2 "Call \"deactivate\" shell function to properly exit this virtualenv."
-    exit 1
-fi
-
-# Check if not running as root.
+# Check if not running as root
 if [[ "$(id -u)" -eq 0 ]]; then
     echo >&2 "You should not be running this as root. Aborting."
     exit 1
 fi
 
-# Explicit check that we have Python 3.6 at least on this system. Otherwise,
-# the use of the option "--prompt" will trigger an error that is absolutely not
-# explicit to indicate that the Python version is too old (since "--prompt" has
-# been introduced in Python 3.6).
-# Note: 0 means true in Bash, but True is 1 in Python world. ;)
-if python3 -c 'import sys; sys.exit(int(sys.version_info >= (3, 6)))'; then
-    echo >&2 "Python 3.6 at least is required for the CLIP OS toolkit."
-    exit 1
-fi
+main() {
+    echo "[+] Building cosmk..."
+    pushd "${PROGPATH}/cosmk" > /dev/null
+    go build -o cosmk -mod=vendor -ldflags "-X main.version=$(cat version)" ./src
+    popd > /dev/null
 
-# Create the virtualenv if it seems not to have been created succesfully
-# previously:
-if ! [[ -d "${VENV}" && -x "${VENV}/bin/pip" && -f "${VENV}/bin/activate" ]]; then
-    echo "[*] Creating virtual env..."
-    mkdir -p "${VENV}"
-    python3 -m venv --symlinks --prompt "toolkit" "${VENV}"
-fi
+    local -r reporoot="$(realpath ${PROGPATH}/../)"
 
-# Populate the virtualenv with the set of packages we require and vendor:
-#
-# With the command above (python3 -m venv ...), we "inherit" by default 3
-# Python packages from the user's Linux distro: setuptools, pip and wheel.
-# (Notice that this is the normal behavior of the venv module in order to
-# provide ways for the user to install new packages in its freshly created
-# venv). However this behavior can cause potential issues that we do not want
-# to hear about (since we do not control the versions of those distro-provided
-# packages). But given the fact that we intentionally provide and vendor
-# **ALL** the packages to be installed in the virtualenv (including pip,
-# setuptools and wheel), we can trick pip into reinstalling them (including
-# itself) with **OUR** packages provided and vendored (and with thoroughly
-# pinned versions).
-#
-# The reason why we use --no-index is to prevent pip from fetching packages (or
-# any package dependency) from PyPI automatically (and without our knowledge).
-# In case of some missing dependencies, this will raise an error and will
-# enable us to take action. With those options below, pip only consider the
-# packages provided/vendored in $VENDOR, i.e. assets/toolkit (ensure to only
-# gather sources packages in this directory).
-echo "[*] Installing: setuptools pip wheel..."
-"${VENV}/bin/pip" install \
-    --no-index --find-links "file://${VENDOR}" \
-    --no-cache-dir --no-binary :all: \
-    --upgrade --force-reinstall setuptools pip wheel
+    pushd "${reporoot}" > /dev/null
+    mkdir -p run/bin
+    mv "toolkit/cosmk/cosmk" "run/bin/cosmk"
+    popd > /dev/null
 
-# And then, we can proceed with the rest of the packages:
-#
-# [2019-04-02] Note/Hack: There is currently a bug in Pip 19 that prevent us
-# from using the option "--no-binary :all:" with packages that make use of PEP
-# 517 build system (e.g. flit), hence the "--no-use-pep517" flag below that
-# will prevent Pip from trying to install such packages.
-# This package restriction could be removed once the bug in Pip will be fixed,
-# follow GitHub issue: https://github.com/pypa/pip/issues/6222
-echo "[*] Installing: requirements.txt..."
-"${VENV}/bin/pip" install \
-    --no-index --find-links "file://${VENDOR}" \
-    --no-cache-dir --no-binary :all: \
-    --no-use-pep517 \
-    --upgrade -r "${REQUIREMENTS_TXT}"
+    # Symlink the helper scripts available in the toolkit's "helpers" directory
+    # in the "run/bin" directory in order to make them appear via PATH.
+    # This eases the ability to call those scripts for the user (espcially for
+    # the scripts intended to be used with "repo forall" as repo changes the
+    # CWD).
+    echo "[*] Installing helpers..."
+    for item in "${PROGPATH}/helpers/"*; do
+        if [[ -x "${item}" ]]; then
+            # Assuming GNU coreutils for the "--relative-to" option of realpath
+            ln -snf \
+                "$(realpath --relative-to="${reporoot}/run/bin" "${item}")" \
+                "${reporoot}/run/bin/${item##*/}"
+        fi
+    done
+    unset item
 
-# Install the clipostoolkit Python package in editable mode (aka. "setup.py
-# develop" mode), i.e. without installing it with copies of all the Python
-# files in the "site-packages" dir. This will allow us to work on the
-# clipostoolkit package source code without having to constantly reinstall the
-# package each time a change is made in this codebase.
-# Also, do not leave setuptools fetch and install dependencies (hence the
-# "--no-deps" flag) for clipostoolkit package as we check them further down and
-# we deliberatly trust the "requirements.txt" to include explicitly all the
-# dependencies for clipostoolkit package.
-echo "[*] Installing: toolkit..."
-"${VENV}/bin/pip" install \
-    --no-deps --no-index \
-    --no-cache-dir --no-binary :all: \
-    --editable "${TOOLKIT}"
+    cat >&2 <<END_OF_BANNER
+[+] Please choose one of the following option to make the cosmk tool available
+    in your shell sessions:
 
-# Symlink the helper scripts available in the toolkit's "helpers" directory in
-# the "bin" directory of the virtualenv in order to make them appear via PATH.
-# This eases the ability to call those scripts for the user (espcially for the
-# scripts intended to be used with "repo forall" as repo changes the CWD).
-echo "[*] Installing: helpers..."
-for item in "${TOOLKIT}/helpers/"*; do
-    if [[ -x "${item}" ]]; then
-        # Assuming GNU coreutils for the "--relative-to" option of realpath:
-        ln -snf \
-            "$(realpath --relative-to="${VENV}/bin" "${item}")" \
-            "${VENV}/bin/${item##*/}"
-    fi
-done
-unset item
+    * Source the toolkit/activate script in your current session:
 
-# Do not install just if the system provides it and we ask not to install it
-if [[ ( -z "$(command -v just)" ) || ( -z "${CLIPOS_USE_SYSTEM_JUST+x}" ) ]]; then
-    echo "[*] Installing: just..."
-    # Build and install just
-    CARGO_HOME="${REPOROOT}/run/cargo"
-    CARGO_TARGET_DIR="${REPOROOT}/run/cargo/target"
+      $ source toolkit/activate
 
-    mkdir -p "${CARGO_HOME}" "${CARGO_TARGET_DIR}"
+    Or:
 
-    cat > "${CARGO_HOME}/config" <<EOF
-[source.crates-io]
-replace-with = "assets_crates-io"
+    1. Move the 'cosmk' binary to a path already in your \$PATH:
 
-[source.assets_crates-io]
-local-registry = "${REPOROOT}/assets/crates-io"
-EOF
+       $ mv '${reporoot}/run/bin/cosmk' ${HOME}/.bin/cosmk # For example
 
-    export CARGO_HOME
-    export CARGO_TARGET_DIR
+    2. Enable Bash or Zsh completion by adding the following code in your
+       '.bashrc' or '.zshrc':
 
-    cargo install --version "0.3.12" --root "${VENV}" --force just
+       # Bash
+       eval "\$(cd ${reporoot}; cosmk --completion-script-bash)"
 
-    unset CARGO_HOME
-    unset CARGO_TARGET_DIR
-fi
+       # Zsh
+       eval "\$(cd ${reporoot}; cosmk --completion-script-zsh)"
+END_OF_BANNER
+}
+
+main
 
 # vim: set ts=4 sts=4 sw=4 et ft=sh tw=79:

@@ -1,11 +1,10 @@
 # SPDX-License-Identifier: LGPL-2.1-or-later
 # Copyright © 2017 ANSSI. All rights reserved.
 
-# Script to be sourced to setup the interactive shell environment of the user
-# to allow him/her to use the whole CLIP OS toolkit easily (cosmk with the
-# shell completion features, our vendored version of just, etc.).
+# Source this script to add 'cosmk' to your $PATH and enable Bash or Zsh
+# completion.
 
-# DISCLAIMER: For now, only Bash and Zsh shells are supported.
+# DISCLAIMER: Only Bash and Zsh shells are supported.
 
 # Development guidelines for this file:
 #   1. Do NOT call "exit" as this would close the user interactive shell
@@ -56,15 +55,10 @@ __check_current_user_not_root() {
 }
 
 __check_not_already_in_venv() {
-    if [ -n "${VIRTUAL_ENV}" ]; then
-        echo >&2 " [!] You seem to already have a virtualenv activated."
-        echo >&2 "     Please \"deactivate\" the current virtualenv to be able to activate this one."
+    if [ -n "${COSMK_ENV}" ]; then
+        echo >&2 " [!] You seem to already have a cosmk environment activated. Aborting."
         return 1
     fi
-}
-
-__prepare_toolkit_runtime_dir() {
-    mkdir -p "${__path_to_runtime_dir}"
 }
 
 __check_shell_umask() {
@@ -176,137 +170,45 @@ END_OF_BANNER
 
 __activate_and_check_venv() {
     echo >&2 " [*] Activating the CLIP OS toolkit for the current shell environment..."
-    if [ ! -f "${__path_to_runtime_dir}/venv/bin/activate" ]; then
-        echo >&2 " [!] The CLIP OS toolkit virtual environment seems not setup."
-        echo >&2 "     Setup the toolkit virtual environment by calling the \"setup.sh\" script located at the root of the toolkit directory."
+    if [ ! -f "${__path_to_runtime_dir}/bin/cosmk" ]; then
+        echo >&2 " [!] Could not find 'cosmk'. Please build 'cosmk' by calling the \"setup.sh\" script located at the root of the toolkit directory."
         return 1
     fi
-    . "${__path_to_runtime_dir}/venv/bin/activate" >/dev/null 2>&1
-    if [ "$?" -ne 0 ]; then
-        echo >&2 # line break
-        echo >&2 " [!] Unexpected error: virtualenv activation has failed."
-        echo >&2 "     Source \"run/venv/bin/activate\" (at the source tree root level) for debugging purposes."
-        return 1
-    fi
+    PATH="${PATH}:$(realpath ${__path_to_runtime_dir}/bin)"
 
-    # Checks that the venv is synchronized/up-to-date with the contents of the
-    # "requirements.txt" file we can find in the toolkit repository/directory:
-    if [ -n "${NO_CHECK_VENV:-}" ]; then
-        echo >&2 " [!] CLIP OS toolkit virtual environment check dismissed by request (NO_CHECK_VENV variable set)."
-        return 0
-    fi
-    # Bash-fu disclaimer: The command below checks that all the package
-    # requirements specified in the "requirements.txt" file in toolkit are
-    # satisfied in the virtualenv [1].
-    # This also tolerates any additional Python package that is not present in
-    # the "requirements.txt" but still does not interfere with all the required
-    # packages (i.e. typically additional Python package installed by and for
-    # the developer convenience).
-    # [1]. "pip" is called directly as PATH (which is always an exported
-    #      variable) has been updated with the activate command above,
-    #      therefore we are sure to compare the Python packages of the venv.
-    toolkit="${__path_to_toolkit}" bash -c '[[ -z "$(diff -u99999 <(grep -Ev "^\s*(#.*)?\$" "${toolkit}/requirements.txt") <(pip freeze --all --exclude-editable) | sed "1,3d;/^[^\-]/d" || :)" ]]'
-    if [ "$?" -ne 0 ]; then
-        if ! type deactivate >/dev/null 2>&1; then
-            echo >&2 " [!] Unexpected error: could not find deactivate function from the seemingly bad virtualenv just activated."
-        elif ! deactivate; then
-            echo >&2 " [!] Unexpected error: could not deactivate properly the seemingly bad virtualenv just activated."
-        fi
-        echo >&2 # line break
-        cat >&2 <<END_OF_BANNER
-  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-  @                                                                         @
-  @    Warning! The already existing CLIP OS toolkit virtual environment    @
-  @  does not seem to match the current toolkit environment specifications. @
-  @                                                                         @
-  @ This may lead to undefined problems when using the CLIP OS toolkit as   @
-  @ the tools you may use with this CLIP OS toolkit environment are no more @
-  @ in sync with the contents of the toolkit repository and, to a greater   @
-  @ extent the contents of the whole source tree.                           @
-  @                                                                         @
-  @ Please ensure to properly re-setup the CLIP OS toolkit environment by   @
-  @ re-calling manually the "setup.sh" script located at the root of the    @
-  @ toolkit directory to fix this environment.                              @
-  @                                                                         @
-  @ If you think this is not justified or you perfectly know what you are   @
-  @ doing, you can proceed by setting NO_CHECK_VENV=1 in your environment   @
-  @ to circumvent this check and then reinvoke the source command.          @
-  @                                                                         @
-  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-END_OF_BANNER
-        echo >&2 # line break
-        return 1
+    # Add an environment variable to remember that this script has been sourced.
+    export COSMK_ENV="true"
+
+    if [ "${__shell_type}" = "zsh" ]; then
+        PROMPT="(cosmk) ${PROMPT}"
+    elif [ "${__shell_type}" = "bash" ]; then
+        PS1="(cosmk) ${PS1}"
     else
-        echo >&2 " [+] CLIP OS toolkit environment successfully activated (and seems up-to-date)."
+        echo >&2 " [!] Unknown shell: could not register shell completion helpers."
+        return 1
     fi
 }
 
 __cosmk_bash_completion() {
     echo >&2 " [*] Registering shell completion helpers for \"cosmk\" commands..."
-    if type register-python-argcomplete cosmk >/dev/null 2>&1; then
-        if [ "${__shell_type}" = "zsh" ]; then
-            if ! type compinit >/dev/null 2>&1; then
-                echo >&2 " [!] Zsh-specific: shell completion feature (compinit) is not loaded."
-                echo >&2 "     \"cosmk\" shell completion won't work."
-                return 0
-            elif ! type complete >/dev/null 2>&1; then
-                echo >&2 " [*] Zsh-specific: Bash-compatible completion feature (bashcompinit) is not loaded."
-                echo >&2 "     Autoloading Bash-compatible completion feature..."
-                autoload -Uz bashcompinit
-                bashcompinit
-                if [ "$?" -ne 0 ]; then
-                    echo >&2 " [!] Zsh-specific: Could not load bashcompinit."
-                    echo >&2 "     \"cosmk\" shell completion won't work."
-                    return 0
-                fi
-            fi
-        elif [ "${__shell_type}" = "bash" ]; then
-            if ! type complete >/dev/null 2>&1; then
-                echo >&2 " [!] Bash-specific: shell completion feature (complete) is not present."
-                echo >&2 "     \"cosmk\" shell completion won't work."
-                return 0
-            fi
-        fi
-
-        # Load the bash completion for cosmk:
-        eval "$(register-python-argcomplete -s bash --no-defaults cosmk)"
+    if [ "${__shell_type}" = "zsh" ]; then
+        eval "$(cosmk --completion-script-zsh)"
+    elif [ "${__shell_type}" = "bash" ]; then
+        eval "$(cosmk --completion-script-bash)"
     else
-        echo >&2 " [!] Unknown error: could not register shell completion helpers."
+        echo >&2 " [!] Unknown shell: could not register shell completion helpers."
         return 1
     fi
-}
-
-__sujust_alias() {
-    echo >&2 " [*] Declaring special alias \"sujust\" to be able to call \"just\" with super-user privileges."
-    echo >&2 "     This alias circumvents the environment sanitizing feature of \"sudo\" which cause issues in our setup."
-
-    # Note/Hack: we need to get through the `env` binary (which semantically
-    # does nothing here) in order to circumvent the binary path resolution
-    # (i.e.  iterating over PATH to find the requested binary) done by sudo
-    # which seem to resolve the requested binary with the "secure_path"
-    # variable value (see sudo configuration) even though we tell sudo to
-    # preserve the environment variable PATH
-    # This hack is there to permit the user to call the `just` program (which
-    # reside in an unsual path) with `sudo` easily.
-    alias sujust='sudo -E --preserve-env=PATH env just'
-}
-
-__symlink_repo_root_justfile() {
-    echo >&2 " [*] Symlinking the justfile dedicated to the source tree root into its expected location."
-    ln -snf "toolkit/repo_root.justfile" "${__path_to_repo_root}/justfile"
 }
 
 # Chain the functions and grab the first non-null return code "raised"
 __activate_return_code__=0
 __check_current_user_not_root \
     && __check_not_already_in_venv \
-    && __prepare_toolkit_runtime_dir \
     && __check_shell_umask \
     && __check_lfs_repositories \
     && __activate_and_check_venv \
     && __cosmk_bash_completion \
-    && __sujust_alias \
-    && __symlink_repo_root_justfile \
         || __activate_return_code__="$?"
 
 # Avoid polluting the user's shell environment with our internal stuff:
@@ -317,13 +219,10 @@ unset -v __shell_type \
     __path_to_runtime_dir
 unset -f __check_current_user_not_root \
     __check_not_already_in_venv \
-    __prepare_toolkit_runtime_dir \
     __check_shell_umask \
     __check_lfs_repositories \
     __activate_and_check_venv \
-    __cosmk_bash_completion \
-    __sujust_alias \
-    __symlink_repo_root_justfile
+    __cosmk_bash_completion
 
 # propagate the return code
 return "${__activate_return_code__}"
