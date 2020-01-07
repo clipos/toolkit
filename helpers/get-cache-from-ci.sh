@@ -37,9 +37,8 @@ main() {
     # Make sure that we are at the repo root
     cd "${REPOROOT}"
 
-    # List of artifacts to retrieve (SDKs, Core & EFIboot packages)
+    # List of artifacts to retrieve (Core & EFIboot packages)
     artifacts=(
-        'sdk.tar.zst'
         'core_pkgs.tar.zst'
         'efiboot_pkgs.tar.zst'
     )
