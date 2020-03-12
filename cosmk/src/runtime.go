@@ -134,6 +134,9 @@ func (cr *containerRuntime) run(image string, command []string, action string, s
 
 	cmd.Args = append(cmd.Args, "run")
 
+	// Disable SELinux confinement to enable access to home directory content
+	cmd.Args = append(cmd.Args, "--security-opt", "label=disable")
+
 	cmd.Args = append(cmd.Args, "--tty", "--interactive")
 	cmd.Args = append(cmd.Args, "--tmpfs", "/tmp:rw,exec,nodev,nosuid")
 	cmd.Args = append(cmd.Args, "--tmpfs", "/var/tmp:rw,exec,dev,suid")
