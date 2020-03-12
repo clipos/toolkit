@@ -118,15 +118,18 @@ func doCache() {
 	body, err := ioutil.ReadAll(resp.Body)
 	Debug.Printf("Received: %s", body)
 
-	var pipeline map[string]interface{}
-	json.Unmarshal([]byte(body), &pipeline)
+	var pipeline []map[string]interface{}
+	err = json.Unmarshal([]byte(body), &pipeline)
+	if err != nil {
+		Error.Fatalf("Could not parse received JSON from the GitLab API: %s", err)
+	}
+
+	Debug.Printf("Parsed json: %s", pipeline)
 
 	buildID := 0.
-	for key, value := range pipeline {
-		if key == "id" {
-			buildID = value.(float64)
-			break
-		}
+	for _, build := range pipeline {
+		buildID = build["id"].(float64)
+		break
 	}
 	if buildID == 0. {
 		Error.Fatalf("Could not find the latest successful pipeline.")
