@@ -76,10 +76,9 @@ func (cr *containerRuntime) findCiImage(name string, version string) error {
 		return nil
 	}
 
-	Error.Printf("Could not find image '%s' in local registry", image)
-	// TODO: Uncomment once the CI is ready!
-	// return r.pullImageFromCi(name, version)
-	return err
+	Info.Printf("Could not find image '%s' in local registry", image)
+
+	return cr.pullImageFromCi(name, version)
 }
 
 func (cr *containerRuntime) findLocalImage(name string, version string) error {

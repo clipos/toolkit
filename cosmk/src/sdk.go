@@ -78,13 +78,15 @@ func (s *sdk) bootstrap() error {
 	imageName := fmt.Sprintf("%s/%s", rootConfig.Product.Name, s.Name)
 	Debug.Printf("Bootstrapping '%s:%s'", imageName, s.Tag)
 
-	err := runtime.findCiImage(imageName, s.Tag)
-	if err == nil {
-		Debug.Printf("No need to bootstrap '%s:%s'", imageName, s.Tag)
-		return nil
+	if rootConfig.Ci.Registry != "" {
+		err := runtime.findCiImage(imageName, s.Tag)
+		if err == nil {
+			Debug.Printf("No need to bootstrap '%s:%s'", imageName, s.Tag)
+			return nil
+		}
 	}
 
-	err = runtime.findLocalImage(imageName, s.Tag)
+	err := runtime.findLocalImage(imageName, s.Tag)
 	if err == nil {
 		Debug.Printf("No need to bootstrap '%s:%s'", imageName, s.Tag)
 		return nil
