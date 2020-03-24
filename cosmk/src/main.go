@@ -16,6 +16,7 @@ var (
 	productNameCmd    = kingpin.Command("product-name", "Output on stdout the product name set in config.toml.")
 	productVersionCmd = kingpin.Command("product-version", "Output on stdout the product version set in config.toml.")
 	ciRegistryCmd     = kingpin.Command("ci-registry", "Output on stdout the registry configured in the CI section in config.toml.")
+	ciArtifacts       = kingpin.Command("ci-artifacts", "Output on stdout the artifacts URL configured in the CI section in config.toml.")
 
 	instrumentationFeaturesCmd = kingpin.Command("instrumentation-features", "List of enabled instrumentation features set in config.toml.")
 	instrumentationFeature     = instrumentationFeaturesCmd.Arg("feature", "Test if given instrumentation feature is enabled.").String()
@@ -93,6 +94,9 @@ func main() {
 
 	case "ci-registry":
 		fmt.Fprintf(os.Stdout, rootConfig.Ci.Registry)
+
+	case "ci-artifacts":
+		fmt.Fprintf(os.Stdout, rootConfig.Ci.Artifacts)
 
 	case "instrumentation-features":
 		doInstrumentationFeatures()
