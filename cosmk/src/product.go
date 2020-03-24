@@ -66,7 +66,7 @@ func (p *product) env() []string {
 	if len(rootConfig.Development.Instrumentation) == 0 {
 		taintedVersion = p.Version
 	} else {
-		taintedVersion = fmt.Sprintf("%s.%s", p.Version, "instrumented")
+		taintedVersion = fmt.Sprintf("%s+%s", p.Version, "instrumented")
 	}
 	env = append(env, "--env", fmt.Sprintf("COSMK_PRODUCT_TAINTED_VERSION=%s", taintedVersion))
 
