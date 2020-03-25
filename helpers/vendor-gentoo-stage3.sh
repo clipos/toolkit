@@ -17,8 +17,6 @@ main() {
         exit 1
     fi
     local -r repo_root="$(cosmk repo-root-path)"
-    local -r product="$(cosmk product-name)"
-    local -r version="$(cosmk product-version)"
 
     # Full path to the vendor dirs:
     local -r vendor="${repo_root}/assets/gentoo"
