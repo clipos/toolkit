@@ -27,7 +27,7 @@ fi
 main() {
     echo "[+] Building cosmk..."
     pushd "${PROGPATH}/cosmk" > /dev/null
-    go build -o cosmk -mod=vendor -ldflags "-X main.version=$(cat version)" ./src
+    go build -o cosmk -mod=vendor -ldflags "-X main.version=$(cat version | tr -d '\n')" ./src
     popd > /dev/null
 
     local -r reporoot="$(realpath ${PROGPATH}/../)"

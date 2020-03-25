@@ -46,7 +46,7 @@ func versionCheck(version string) {
 		log.Fatalf("Could not open version file '%s': %s", versionFile, err)
 	}
 
-	versionFromFile := string(content)
+	versionFromFile := strings.TrimSuffix(string(content), "\n")
 	if versionFromFile != version {
 		log.Fatalf("Current cosmk is '%s' while repository version is '%s'. Please rebuild cosmk.", version, versionFromFile)
 	}

@@ -6,7 +6,7 @@ The full documentation for the CLIP OS project and this toolkit is available at
 ## Build
 
 ```
-$ go build -o cosmk -mod=vendor -ldflags "-X main.version=$(cat version)" ./src
+$ go build -o cosmk -mod=vendor -ldflags "-X main.version=$(cat version | tr -d '\n')" ./src
 ```
 
 ## Interactive shell completion
