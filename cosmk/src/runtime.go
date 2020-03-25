@@ -201,10 +201,11 @@ func (cr *containerRuntime) run(image string, command []string, action string, s
 		}
 	}
 
-	// Network access only on developer workstations and during 'build' and 'bootstrap' actions
+	// Network access is disabled by default. It can be re-enabled during
+	// development for 'bootstrap', 'build' and 'run' actions.
 	if rootConfig.Development.Network != "yes" {
 		cmd.Args = append(cmd.Args, "--network=none")
-	} else if !(action == "bootstrap" || action == "build") {
+	} else if !(action == "bootstrap" || action == "build" || action == "run") {
 		cmd.Args = append(cmd.Args, "--network=none")
 	}
 
